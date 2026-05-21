@@ -50,12 +50,13 @@ class W_final_pf {
     std::string MEA_structure;
     std::string centroid_structure;
     int num_samples;
+    bool print_samples;
     pf_t frequency;
     pf_t ensemble_diversity;
     std::unordered_map<std::string, int> structures;
     double gamma;
 
-    W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &ShapeData, bool pk_free, bool pk_only, int dangle, double energy, int num_samples, bool PSplot, double gamma);
+    W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &ShapeData, bool pk_free, bool pk_only, int dangle, double energy, int num_samples, bool print_samples, bool PSplot, double gamma);
     // constructor for the restricted mfe case
 
     ~W_final_pf();

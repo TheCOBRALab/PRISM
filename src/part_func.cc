@@ -11,7 +11,7 @@
 
 #define debug 0
 
-W_final_pf::W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &ShapeData, bool pk_free,bool pk_only, int dangle, double energy, int num_samples, bool PSplot, double gamma)
+W_final_pf::W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &ShapeData, bool pk_free,bool pk_only, int dangle, double energy, int num_samples, bool print_samples, bool PSplot, double gamma)
     : exp_params_(scale_pf_parameters()) {
     this->seq = seq;
     this->MFE_structure = MFE_structure;
@@ -20,6 +20,7 @@ W_final_pf::W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &S
     this->pk_only = pk_only;
     this->PSplot = PSplot;
     this->num_samples = num_samples;
+    this->print_samples = print_samples;
     this->gamma = gamma;
     this->ShapeData = &ShapeData;
 
@@ -176,6 +177,17 @@ pf_t W_final_pf::hfold_pf(sparse_tree &tree) {
         std::string structure(n, '.');
         Sample_W(1, n, structure, samples, tree);
         structures[structure]++;
+    }
+
+    if (print_samples) {
+        std::vector<std::pair<std::string,int>> str_list;
+        for (const auto &s : structures) {
+            str_list.push_back(std::make_pair(s.first,s.second));
+        }
+        sort(str_list.begin(), str_list.end(),[](auto &x,auto &y) {return x.second>y.second;} );
+        for (const auto &s : str_list) {
+            std::cout << s.first << " " << s.second << std::endl;
+        }
     }
 
     pairing_tendency(samples, tree);

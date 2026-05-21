@@ -92,8 +92,8 @@ std::string hfold(std::string seq, std::string res, double &energy, sparse_tree 
 }
 
 std::string hfold_pf(std::string &seq, std::string &final_structure, double &energy, std::string &MEA_structure, pf_t &MEA, std::string &centroid_structure, std::vector<std::pair<std::string,double>> &fatgraphs,pf_t &distance, pf_t &frequency, pf_t &diversity, int &num_fatgraphs, sparse_tree &tree, SHAPEData &ShapeData, bool pk_free,bool pk_only, int dangles, double min_en,
-                     int num_samples, bool PSplot, double gamma) {
-    W_final_pf min_fold(seq, final_structure,ShapeData, pk_free,pk_only, dangles, min_en, num_samples, PSplot, gamma);
+                     int num_samples, bool print_samples, bool PSplot, double gamma) {
+    W_final_pf min_fold(seq, final_structure,ShapeData, pk_free,pk_only, dangles, min_en, num_samples, print_samples, PSplot, gamma);
     energy = min_fold.hfold_pf(tree);
     std::string structure = min_fold.structure;
     MEA = min_fold.hfold_MEA(tree);
@@ -128,29 +128,31 @@ int main(int argc, char *argv[]) {
     }
 
     std::string restricted;
-    args_info.input_structure_given ? restricted = input_struct : restricted = "";
+    args_info.input_structure_given ? restricted = args_info.input_structure_arg : restricted = "";
     std::string fileI;
-    args_info.input_file_given ? fileI = input_file : fileI = "";
+    args_info.input_file_given ? fileI = args_info.input_file_arg : fileI = "";
 
     std::string fileO;
-    args_info.output_file_given ? fileO = output_file : fileO = "";
+    args_info.output_file_given ? fileO = args_info.output_file_arg : fileO = "";
 
-    int number_of_suboptimal_structure = args_info.subopt_given ? subopt : 1;
+    int number_of_suboptimal_structure = args_info.subopt_given ? args_info.subopt_arg : 1;
 
     bool pk_free = args_info.pk_free_given;
     bool pk_only = args_info.pk_only_given;
     // bool fatgraph_bool = args_info.fatgraph_given;
-    std::string shapeFile = args_info.shape_given ? shape_file : "";
+    std::string shapeFile = args_info.shape_given ? args_info.shape_arg : "";
 
-    int dangles = args_info.dangles_given ? dangle_model : 2;
+    int dangles = args_info.dangles_given ? args_info.dangles_arg : 2;
 
-    int num_samples = args_info.samples_given ? samples : 1000;
+    int num_samples = args_info.samples_given ? args_info.samples_arg : 1000;
 
-    double gamma = args_info.gamma_given ? cmdline_gamma : 1;
+    bool print_samples = args_info.print_samples_given;
+
+    double gamma = args_info.gamma_given ? args_info.gamma_arg : 1;
 
     bool PSplot = !args_info.noPS_given;
 
-    int num_fatgraph = args_info.fatgraph_given ? num_fatgraphs : 1;
+    int num_fatgraph = args_info.fatgraph_given ? args_info.fatgraph_arg : 1;
 
     if (fileI != "") {
 
@@ -169,7 +171,7 @@ int main(int argc, char *argv[]) {
     if (restricted != "") validateStructure(seq, restricted);
     if (pk_free) if (restricted == "") restricted = std::string(n,'.');
 
-    std::string file = args_info.paramFile_given ? parameter_file : "params/rna_DirksPierce09.par";
+    std::string file = args_info.paramFile_given ? args_info.paramFile_arg : "params/rna_DirksPierce09.par";
     if (exists(file)) {
         vrna_params_load(file.c_str(), VRNA_PARAMETER_FORMAT_DEFAULT);
     } else if (seq.find('T') != std::string::npos) {
@@ -205,7 +207,7 @@ int main(int argc, char *argv[]) {
         std::string structure = hotspot_list[i].get_structure();
         sparse_tree tree(structure, n);
         std::string final_structure = hfold(seq, structure, energy, tree,ShapeData, pk_free, pk_only, dangles);
-        std::string final_structure_pf = hfold_pf(seq, final_structure, energy_pf,MEA_structure,MEA,centroid_structure,fatgraphs[i],distance,frequency, diversity,num_fatgraph, tree,ShapeData, pk_free,pk_only, dangles, energy, num_samples, PSplot, gamma);
+        std::string final_structure_pf = hfold_pf(seq, final_structure, energy_pf,MEA_structure,MEA,centroid_structure,fatgraphs[i],distance,frequency, diversity,num_fatgraph, tree,ShapeData, pk_free,pk_only, dangles, energy, num_samples, print_samples, PSplot, gamma);
 
         if (!args_info.input_structure_given && energy > 0.0) {
             energy = 0.0;

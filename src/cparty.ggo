@@ -1,0 +1,73 @@
+package "CParty"
+version "1.0"
+args "--unamed-opts=input"
+
+purpose "Possibly pseudoknotted partition function of RNAs"
+
+usage "CParty [options] [sequence]"
+
+description "Read RNA sequence from stdin or cmdline; predict minimum\nfree energy, optimum structure, and ensemble energy using the possibly\npseuodknotted partiton function RNA folding algorithm"
+
+# Options
+
+option "input-structure" r
+    "Give a restricted structure as an input structure"
+    string optional
+
+option "input-file" i
+    "Give a path to an input file containing the sequence (and input structure if known)"
+    string optional
+
+option "output-file" o
+    "Give a path to an output file which will the sequence, and its structure and energy"
+    string optional
+
+option "subopt" n
+    "Specify the number of suboptimal structures to output (default is 1)"
+    int default="1" optional
+
+option "pk-free" p
+    "Specify whether you only want the pseudoknot-free structure to be calculated"
+    flag off
+
+option "pk-only" k
+    "Only add base pairs which cross the constraint structure. The constraint structure is returned if there are no energetically favorable crossing base pairs"
+    flag off
+
+option "dangles" d
+    "Specify the dangle model to be used (base is 2)"
+    int default="2" optional
+
+option "paramFile" P
+    "Read energy parameters from paramfile, instead of using the default parameter set."
+    string optional
+
+option "samples" s
+    "Give the number of samples for the stochastic backtracking (default: 1000)"
+    int default="1000" optional
+
+option "print-samples" O
+    "Print the samples with their multiplicities"
+    flag off
+
+option "gamma" g
+    "Give the gamma value weighting of base pairs in the MEA (default: 1)"
+    double default="1" optional
+
+option "shape" S
+    "Give a path to a shape file corresponding to the sequence given"
+    string optional
+
+option "fatgraph" f
+    "Give the number of fatgraphs outputted, along with their frequencies (default 1)"
+    int default="1" optional
+
+option "noConv" -
+    "Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA"
+    flag off
+
+option "noPS" -
+    "Don't create a Postscript drawing of the base pair probabilities"
+    flag off
+
+text "\nThe input sequence is read from standard input, unless it is\ngiven on the command line.\n"
