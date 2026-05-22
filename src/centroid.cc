@@ -210,6 +210,51 @@ std::string generate_fatgraph(std::string &structure,const std::vector<int> &fre
    return fatgraph;
 }
 
+std::string postprocess_fatgraph(std::string &structure){
+    cand_pos_t n = structure.length();
+    std::vector<int> paren;
+    std::vector<int> sb;
+    std::vector<std::pair<int,int>> pairs;
+    for(int j = 0;j<n;++j){
+        if(structure[j] == '('){
+            paren.push_back(j);
+        }
+        else if(structure[j] == '['){
+            sb.push_back(j);
+        }
+        else if(structure[j] == ')'){
+            int i = paren.back();
+            pairs.push_back(std::make_pair(i,j));
+            paren.pop_back();
+        }
+        else if(structure[j] == ']'){
+            int i = sb.back();
+            pairs.push_back(std::make_pair(i,j));
+            sb.pop_back();
+        }
+    }
+    std::sort(pairs.begin(), pairs.end(), [](const std::pair<int,int> &a, const std::pair<int,int> &b){return a.first < b.first;});
+    std::string new_structure(n,'.');
+    if(!pairs.empty()){
+        std::pair<int,int> last = pairs[0];
+        new_structure[last.first] = '(';
+        new_structure[last.second] = ')';
+        for(std::pair<int,int> pair: pairs){
+            if(!(pair.first>last.first && pair.second<last.second) && !(pair.first>last.second && pair.second>last.second)) continue;
+            new_structure[pair.first] = '(';
+            new_structure[pair.second] = ')';
+            if(!(pair.first>last.first && pair.second<last.second)) last = pair;
+        }
+        for(std::pair<cand_pos_t,cand_pos_t> pair: pairs){
+            if(new_structure[pair.first] == '.'){
+                new_structure[pair.first] = '[';
+                new_structure[pair.second] = ']';
+            }
+        }
+    }
+    return new_structure;
+}
+
 std::string W_final_pf::get_fatgraph(std::string structure){
     const cand_pos_t n = structure.length();
     std::vector<int> fres(n,-2);
@@ -217,5 +262,6 @@ std::string W_final_pf::get_fatgraph(std::string structure){
     generate_pt(structure,fres,up,n);
 
     std::string fatgraph = generate_fatgraph(structure,fres,up,n);
+    fatgraph = postprocess_fatgraph(fatgraph);
     return fatgraph;
 }

@@ -157,6 +157,7 @@ class W_final_pf {
   private:
     std::string seq;
     std::string MFE_structure;
+    double MFE_en;
     bool pk_free;
     bool pk_only;
     bool PSplot;
@@ -194,7 +195,8 @@ class W_final_pf {
     /**           MEA            */
     // std::vector<pf_t> probs;
 
-    double to_Energy(pf_t energy, cand_pos_t length);
+    pf_t to_Energy(pf_t energy, cand_pos_t length);
+    pf_t to_PF(pf_t energy, cand_pos_t length);
     void rescale_pk_globals();
 
     void exp_params_rescale(double mfe);

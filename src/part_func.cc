@@ -22,6 +22,8 @@ W_final_pf::W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &S
     this->num_samples = num_samples;
     this->gamma = gamma;
     this->ShapeData = &ShapeData;
+    this->MFE_en = energy;
+    // srand(time(NULL));
 
     make_pair_matrix();
     exp_params_->model_details.dangles = dangle;
@@ -55,7 +57,7 @@ W_final_pf::W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &S
     BE.resize(total_length, 0);
 
     rescale_pk_globals();
-    exp_params_rescale(energy);
+    exp_params_rescale(MFE_en);
     W.resize(n + 1, scale[1]);
     WI.resize(total_length, scale[1]);
 
@@ -74,7 +76,6 @@ void W_final_pf::exp_params_rescale(double mfe) {
     if (exp_params_->pf_scale < 1.) exp_params_->pf_scale = 1.;
 
     // exp_params_->pf_scale = 1.;
-
     this->scale[0] = 1.;
     this->scale[1] = (pf_t)(1. / exp_params_->pf_scale);
     this->expMLbase[0] = 1;
@@ -136,6 +137,9 @@ int W_final_pf::compute_exterior_cases(cand_pos_t l, cand_pos_t j, sparse_tree &
 inline pf_t W_final_pf::to_Energy(pf_t energy, cand_pos_t length) {
     return ((-log(energy) - length * log(exp_params_->pf_scale)) * exp_params_->kT / 1000.0);
 }
+inline pf_t W_final_pf::to_PF(pf_t energy, cand_pos_t length) {
+    return exp(-(energy*1000/exp_params_->kT)-length*log(exp_params_->pf_scale));
+}
 
 pf_t W_final_pf::hfold_pf(sparse_tree &tree) {
 
@@ -179,7 +183,41 @@ pf_t W_final_pf::hfold_pf(sparse_tree &tree) {
     }
 
     pairing_tendency(samples, tree);
-    this->frequency = (pf_t)structures[MFE_structure] / num_samples;     
+    this->frequency = (pf_t)structures[MFE_structure] / num_samples;  
+    // std::cout << std::fixed << std::setprecision(6) << to_PF(MFE_en,n)/W[n] << "\t" << this->frequency << std::endl; 
+    // std::ofstream out("320.txt");
+    // pf_t p = 0;  
+    // for (cand_pos_t i = 1; i <= n; i++){
+    //     for (cand_pos_t j = i + 1; j <= n; j++) {
+    //         std::pair<cand_pos_tu, cand_pos_tu> base_pair(i, j);
+    //         p = (pf_t)samples[base_pair] / num_samples;
+    //         out << std::fixed << std::setprecision(6) << p << std::endl;
+            
+    //     }
+    // }
+    // out.close();
+    // std::ifstream in("100.txt");
+    // p = 0;
+    // pf_t p_100000 = 0;
+    // double rmsd = 0;
+    // std::string str;
+    // int N = 0;  
+    // for (cand_pos_t i = 1; i <= n; i++){
+    //     for (cand_pos_t j = i + 1; j <= n; j++) {
+    //         std::getline(in,str);
+    //         p_100000 = stod(str);
+    //         if(p_100000 == 0.0) continue;
+    //         if(tree.tree[i].pair == j) continue;
+    //         std::pair<cand_pos_tu, cand_pos_tu> base_pair(i, j);
+    //         p = (pf_t)samples[base_pair] / num_samples;
+    //         rmsd+= pow(p-p_100000,2);
+    //         ++N;
+    //     }
+    // }
+    // in.close();
+    // rmsd = rmsd/N;
+    // rmsd = sqrt(rmsd);
+    // std::cout << std::fixed << std::setprecision(6) << rmsd << std::endl;
 
     if (PSplot) {
         create_dot_plot(seq, tree.tree, MFE_structure, samples, num_samples);
@@ -308,7 +346,7 @@ void W_final_pf::compute_energy_WM_restricted(cand_pos_t i, cand_pos_t j, sparse
     cand_pos_t ij = index[(i)] + (j) - (i);
     cand_pos_t ijminus1 = index[(i)] + (j)-1 - (i);
 
-    for (cand_pos_t k = i; k < j - TURN; ++k) {
+    for (cand_pos_t k = j - TURN - 1; k >= i; --k) {
         pf_t qbt1 = get_energy(k, j) * exp_MLstem(k, j);
         pf_t qbt2 = get_energy_WMB(k, j) * expPSM_penalty * expb_penalty;
         bool can_pair = tree.up[k - 1] >= (k - i);
@@ -890,7 +928,7 @@ void W_final_pf::Sample_VM(cand_pos_t i, cand_pos_t j, std::string &structure,
         exit(0); /* error */
     }
     pf_t V_temp = 0.;
-    pf_t VM_inside = get_energy_VM(i, j) / scale[2]; // If I remove scale from VM's saved values, I may save time here.
+    pf_t VM_inside = get_energy_VM(i, j) / scale[2]; // Should this be * or /, I'm pretty sure *
     pf_t r = vrna_urn() * VM_inside;
     bool unpaired = false;
     bool pseudoknot = false;
@@ -945,18 +983,14 @@ void W_final_pf::Sample_WM(cand_pos_t i, cand_pos_t j, std::string &structure,
     pf_t V_temp = 0.;
 
     if (i + TURN >= j) {
-        // return;
         printf("backtracking impossible for WM[%u, %u]\n", i, j);
         exit(0); /* error */
     }
-
     for (; j > i + TURN; --j) {
+        V_temp = get_energy_WM(i, j - 1) * expMLbase[1];
         if (tree.tree[j].pair < 0) {
             pf_t r = vrna_urn() * (get_energy_WM(i, j));
-
-            V_temp = get_energy_WM(i, j - 1) * expMLbase[1];
-            qt = V_temp;
-            if (r > qt) {
+            if (r > V_temp) {
                 break;
             }
         } else {
@@ -968,16 +1002,14 @@ void W_final_pf::Sample_WM(cand_pos_t i, cand_pos_t j, std::string &structure,
         printf("backtracking failed for WM\n");
         exit(0); /* error */
     }
-
     qt = 0.;
     pf_t qm_rem = get_energy_WM(i, j) - V_temp;
     pf_t r = vrna_urn() * qm_rem;
-    for (k = i; k < j - TURN; ++k) {
+    for (k = j - TURN - 1; k >= i; --k) {
         qbt1 = get_energy(k, j) * exp_MLstem(k, j);
         qbt2 = get_energy_WMB(k, j) * expPSM_penalty * expb_penalty;
         bool can_pair = tree.up[k - 1] >= (k - i);
         if (can_pair) {
-
             V_temp = static_cast<pf_t>(expMLbase[k - i]) * qbt1;
             qt += V_temp;
             if (qt >= r) {
@@ -1022,17 +1054,15 @@ void W_final_pf::Sample_WM(cand_pos_t i, cand_pos_t j, std::string &structure,
 void W_final_pf::Sample_WMV(cand_pos_t i, cand_pos_t j, std::string &structure,
                             std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
     if (debug) printf("WMv at %d and %d\n", i, j);
-    pf_t qt = 0;
 
     pf_t V_temp = 0.;
 
     for (; j > i + TURN; --j) {
+        V_temp = get_energy_WMv(i, j - 1) * expMLbase[1];
         if (tree.tree[j].pair < 0) { // Checking if j can be unpaired
             pf_t r = vrna_urn() * get_energy_WMv(i, j);
 
-            V_temp = get_energy_WMv(i, j - 1) * expMLbase[1];
-            qt = V_temp;
-            if (r > qt) {
+            if (r > V_temp) {
                 break;
             }
         } else {
@@ -1051,17 +1081,15 @@ void W_final_pf::Sample_WMV(cand_pos_t i, cand_pos_t j, std::string &structure,
 void W_final_pf::Sample_WMP(cand_pos_t i, cand_pos_t j, std::string &structure,
                             std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
     if (debug) printf("WMp at %d and %d\n", i, j);
-    pf_t qt = 0;
 
     pf_t V_temp = 0.;
 
     for (; j > i + TURN; --j) {
+        V_temp = get_energy_WMp(i, j - 1) * expMLbase[1];
         if (tree.tree[j].pair < 0) { // Checking if j can be unpaired
             pf_t r = vrna_urn() * get_energy_WMp(i, j);
 
-            V_temp = get_energy_WMp(i, j - 1) * expMLbase[1];
-            qt = V_temp;
-            if (r > qt) {
+            if (r > V_temp) {
                 break;
             }
         } else {
@@ -1128,12 +1156,11 @@ void W_final_pf::Sample_WI(cand_pos_t i, cand_pos_t j, std::string &structure,
     pf_t V_temp = 0;
     if (j > i) {
         for (; j > i + TURN; --j) {
+            V_temp = get_energy_WI(i, j - 1) * expPUP_pen[1];
             if (tree.tree[j].pair < 0) { // Checking if j can be unpaired
                 pf_t r = vrna_urn() * (get_energy_WI(i, j));
 
-                V_temp = get_energy_WI(i, j - 1) * expPUP_pen[1];
-                qt = V_temp;
-                if (r > qt) {
+                if (r > V_temp) {
                     break;
                 }
             } else {
@@ -1184,12 +1211,11 @@ void W_final_pf::Sample_WIP(cand_pos_t i, cand_pos_t j, std::string &structure,
     pf_t V_temp = 0;
     if (j <= i) return;
     for (; j > i + TURN; --j) {
+        V_temp = get_energy_WIP(i, j - 1) * expcp_pen[1];
         if (tree.tree[j].pair < 0) { // Checking if j can be unpaired
             pf_t r = vrna_urn() * (get_energy_WIP(i, j) - fbd);
 
-            V_temp = get_energy_WIP(i, j - 1) * expcp_pen[1];
-            qt = V_temp;
-            if (r > qt) {
+            if (r > V_temp) {
                 break;
             }
         } else {
