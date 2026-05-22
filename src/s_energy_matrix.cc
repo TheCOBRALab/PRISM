@@ -281,9 +281,7 @@ energy_t s_energy_matrix::compute_energy_VM_restricted(cand_pos_t i, cand_pos_t 
 // compute the MFE of a multi-loop closed at (i,j), the restricted case
 {
     energy_t min = INF;
-    // i--;
-    // j--;
-    for (cand_pos_t k = i + 1; k <= j - 3; ++k) {
+    for (cand_pos_t k = i + 1; k <= j - TURN - 1; ++k) {
         energy_t WM2ij = get_energy_WM(i + 1, k - 1) + get_energy_WMv(k, j - 1);
         WM2ij = std::min(WM2ij, get_energy_WM(i + 1, k - 1) + get_energy_WMp(k, j - 1));
         if (tree.up[k - 1] >= (k - (i + 1))) WM2ij = std::min(WM2ij, static_cast<energy_t>((k - i - 1) * params_->MLbase) + get_energy_WMp(k, j - 1));

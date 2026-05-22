@@ -84,16 +84,16 @@ void validateSequence(std::string sequence) {
     }
 }
 
-std::string hfold(std::string seq, std::string res, double &energy, sparse_tree &tree, SHAPEData &ShapeData, bool pk_free, bool pk_only, int dangles) {
+std::string hfold(std::string seq, std::string res, pf_t &energy, sparse_tree &tree, SHAPEData &ShapeData, bool pk_free, bool pk_only, int dangles) {
     W_final min_fold(seq, res,ShapeData, pk_free, pk_only, dangles);
     energy = min_fold.hfold(tree);
     std::string structure = min_fold.structure;
     return structure;
 }
 
-std::string hfold_pf(std::string &seq, std::string &final_structure, double &energy, std::string &MEA_structure, pf_t &MEA, std::string &centroid_structure, std::vector<std::pair<std::string,double>> &fatgraphs,pf_t &distance, pf_t &frequency, pf_t &diversity, int &num_fatgraphs, sparse_tree &tree, SHAPEData &ShapeData, bool pk_free,bool pk_only, int dangles, double min_en,
-                     int num_samples, bool print_samples, bool PSplot, double gamma) {
-    W_final_pf min_fold(seq, final_structure,ShapeData, pk_free,pk_only, dangles, min_en, num_samples, print_samples, PSplot, gamma);
+std::string hfold_pf(std::string &seq, std::string &final_structure, pf_t &energy, std::string &MEA_structure, pf_t &MEA, std::string &centroid_structure, std::vector<std::pair<std::string,double>> &fatgraphs,pf_t &distance, pf_t &frequency, pf_t &diversity, int &num_fatgraphs, sparse_tree &tree, SHAPEData &ShapeData, bool pk_free,bool pk_only, int dangles, double min_en,
+                     int num_samples, bool PSplot, double gamma) {
+    W_final_pf min_fold(seq, final_structure,ShapeData, pk_free,pk_only, dangles, min_en, num_samples, PSplot, gamma);
     energy = min_fold.hfold_pf(tree);
     std::string structure = min_fold.structure;
     MEA = min_fold.hfold_MEA(tree);
@@ -103,6 +103,7 @@ std::string hfold_pf(std::string &seq, std::string &final_structure, double &ene
     min_fold.hfold_fatgraph(fatgraphs,num_fatgraphs);
     diversity = min_fold.ensemble_diversity;
     frequency = min_fold.frequency;
+    // std::cout << std::fixed << std::setprecision(4) << min_en << "\t" << energy << "\t" << MEA << "\t" << distance << std::endl;
     return structure;
 }
 
@@ -139,8 +140,7 @@ int main(int argc, char *argv[]) {
 
     bool pk_free = args_info.pk_free_given;
     bool pk_only = args_info.pk_only_given;
-    // bool fatgraph_bool = args_info.fatgraph_given;
-    std::string shapeFile = args_info.shape_given ? args_info.shape_arg : "";
+    std::string shapeFile = args_info.shape_given ? shape_file : "";
 
     int dangles = args_info.dangles_given ? args_info.dangles_arg : 2;
 
@@ -221,7 +221,6 @@ int main(int argc, char *argv[]) {
 
     Result::Result_comp result_comp;
     std::sort(result_list.begin(), result_list.end(), result_comp);
-    std::cout.precision(4);
 
     int number_of_output = 1;
 
@@ -264,11 +263,10 @@ int main(int argc, char *argv[]) {
             std::cout << result_list[0].get_MEA_structure() << " (" << result_list[0].get_MEA() << ")" << std::endl;
             std::cout << result_list[0].get_centroid_structure() << " (" << result_list[0].get_distance() << ")" << std::endl;
             for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
-               std::cout << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
+               std::cout << std::fixed << std::setprecision(4) << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
             }
             std::cout << std::endl;
             std::cout << "frequency of MFE structure in ensemble: " << result_list[0].get_frequency() << "; ensemble diversity " << result_list[0].get_diversity() << std::endl;
-            // std::cout << result_list[0].get_final_energy() << "\t" << result_list[0].get_pf_energy() << "\t" << result_list[0].get_distance() << "\t" << result_list[0].get_MEA() << std::endl;
         } else {
             for (cand_pos_t i = 0; i < number_of_output; i++) {
                 if (i>0 && result_list[i].get_final_structure() == result_list[i - 1].get_final_structure()) continue;

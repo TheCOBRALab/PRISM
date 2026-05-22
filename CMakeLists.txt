@@ -11,7 +11,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto")
+set(CMAKE_CXX_FLAGS_RELEASE "-g -flto")
 
 SET(SOURCE
   src/W_final.cc 
@@ -26,7 +26,7 @@ SET(SOURCE
   src/dot_plot.cc
   src/mea.cc
   src/centroid.cc
-  src/mwm.cc
+#   src/mwm.cc
   src/SHAPE.cc
 )
 
