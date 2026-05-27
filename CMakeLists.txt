@@ -11,7 +11,7 @@ endif()
 
 set(CMAKE_CXX_FLAGS "-Wall -Wextra")
 set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-g -flto")
+set(CMAKE_CXX_FLAGS_RELEASE "-O3 -flto")
 
 SET(SOURCE
   src/W_final.cc 

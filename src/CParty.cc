@@ -92,8 +92,8 @@ std::string hfold(std::string seq, std::string res, pf_t &energy, sparse_tree &t
 }
 
 std::string hfold_pf(std::string &seq, std::string &final_structure, pf_t &energy, std::string &MEA_structure, pf_t &MEA, std::string &centroid_structure, std::vector<std::pair<std::string,double>> &fatgraphs,pf_t &distance, pf_t &frequency, pf_t &diversity, int &num_fatgraphs, sparse_tree &tree, SHAPEData &ShapeData, bool pk_free,bool pk_only, int dangles, double min_en,
-                     int num_samples, bool PSplot, double gamma) {
-    W_final_pf min_fold(seq, final_structure,ShapeData, pk_free,pk_only, dangles, min_en, num_samples, PSplot, gamma);
+                     int num_samples, bool print_samples, bool PSplot, double gamma) {
+    W_final_pf min_fold(seq, final_structure,ShapeData, pk_free,pk_only, dangles, min_en, num_samples,print_samples, PSplot, gamma);
     energy = min_fold.hfold_pf(tree);
     std::string structure = min_fold.structure;
     MEA = min_fold.hfold_MEA(tree);
@@ -103,7 +103,6 @@ std::string hfold_pf(std::string &seq, std::string &final_structure, pf_t &energ
     min_fold.hfold_fatgraph(fatgraphs,num_fatgraphs);
     diversity = min_fold.ensemble_diversity;
     frequency = min_fold.frequency;
-    // std::cout << std::fixed << std::setprecision(4) << min_en << "\t" << energy << "\t" << MEA << "\t" << distance << std::endl;
     return structure;
 }
 
@@ -140,7 +139,7 @@ int main(int argc, char *argv[]) {
 
     bool pk_free = args_info.pk_free_given;
     bool pk_only = args_info.pk_only_given;
-    std::string shapeFile = args_info.shape_given ? shape_file : "";
+    std::string shapeFile = args_info.shape_given ? args_info.shape_arg : "";
 
     int dangles = args_info.dangles_given ? args_info.dangles_arg : 2;
 
