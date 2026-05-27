@@ -772,7 +772,7 @@ void expand_hotspot(s_energy_matrix *V, Hotspot &hotspot, int n) {
     base_type j = hotspot.get_right_outer_index();
     pair_type tt = pair[V->S_[i]][V->S_[j]];
     base_type si1 = i > 1 ? V->S_[i - 1] : -1;
-    base_type sj1 = j <= n ? V->S_[j + 1] : -1;
+    base_type sj1 = j < n ? V->S_[j + 1] : -1;
     energy_t dangle_penalty = vrna_E_ext_stem(tt, si1, sj1, V->params_);
 
     double energy = V->get_energy(hotspot.get_left_outer_index(), hotspot.get_right_outer_index());
