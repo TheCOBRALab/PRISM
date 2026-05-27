@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.8)
-project(CParty)
+project(PRISM)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -17,7 +17,7 @@ SET(SOURCE
   src/W_final.cc 
   src/pseudo_loop.cc 
   src/part_func.cc
-  src/CParty.cc
+  src/PRISM.cc
   src/cmdline.cc
   src/Result.cc	
   src/s_energy_matrix.cc	
@@ -100,11 +100,11 @@ add_library(RNA STATIC ${vienna_SOURCE})
 
 target_include_directories(RNA PRIVATE .)
 
-add_executable(CParty ${SOURCE})
+add_executable(PRISM ${SOURCE})
 
 # Install CParty into the bin directory
-install(TARGETS CParty RUNTIME DESTINATION bin)
+install(TARGETS PRISM RUNTIME DESTINATION bin)
 
-target_link_libraries(CParty PRIVATE RNA)
+target_link_libraries(PRISM PRIVATE RNA)
 
 include_directories(src)

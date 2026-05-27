@@ -1,10 +1,10 @@
-package "CParty"
+package "PRISM"
 version "1.0"
 args "--unamed-opts=input"
 
 purpose "Possibly pseudoknotted partition function of RNAs"
 
-usage "CParty [options] [sequence]"
+usage "PRISM [options] [sequence]"
 
 description "Read RNA sequence from stdin or cmdline; predict minimum\nfree energy, optimum structure, and ensemble energy using the possibly\npseuodknotted partiton function RNA folding algorithm"
 

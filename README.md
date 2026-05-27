@@ -1,11 +1,11 @@
-# CParty
+# PRISM
 
 #### Description:
-Software implementation of CParty.     
-CParty is an algorithm for computing the conditional partition function for density-2 RNA pseudoknots.
+Software implementation of PRISM.     
+PRISM is an algorithm for computing the conditional partition function for density-2 RNA pseudoknots.
 
 #### Cite: 
-Trinity, Luke, Sebastian Will, Yann Ponty, Ulrike Stege, and Hosna Jabbari. "CParty: Conditional partition function for density-2 RNA pseudoknots." bioRxiv (2023): 2023-05.
+Trinity, Luke, Sebastian Will, Yann Ponty, Ulrike Stege, and Hosna Jabbari. "PRISM: Conditional partition function for density-2 RNA pseudoknots." bioRxiv (2023): 2023-05.
 https://doi.org/10.1101/2023.05.16.541023 
 
 #### Supported OS: 
@@ -62,7 +62,7 @@ Help
 ========================================
 
 ```
-Usage: CParty[options] [input sequence]
+Usage: PRISM[options] [input sequence]
 ```
 
 Read input file from cmdline; predict minimum free energy, ensemble energy, optimum structure, and BPP structure using the RNA folding algorithm.
@@ -95,7 +95,7 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
         if -o is provided with just a file name without a path, the output file will be generated in the diretory where the executable is called
         if -o is provided with just a file name without a path, and if -i is provided, then the output file will be generated in the directory where the input file is located
         if suboptimal structures are specified, repeated structures are skipped. That is, if different input structures come to the same conclusion, only those that are different are shown
-        If no input structure is given, or suboptimal structures are greater than the number given, CParty generates hotspots to be used as input structures -- where hotspots are energetically favorable stems
+        If no input structure is given, or suboptimal structures are greater than the number given, PRISM generates hotspots to be used as input structures -- where hotspots are energetically favorable stems
         The default parameter file is DP09. This can be changed via -P and specifying the parameter file you would like
         A Postscript file will be generated automatically showing the base pairing probabilities. This can be turned off with --noPS
     
@@ -126,6 +126,10 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
         Line1: Sequence
         Line2: MFE structure (MFE energy)
         Line3: BPP structure (Ensemble Energy)
+        Line4: MEA structure (MEA)
+        Line5: Centroid structure (distance)
+        Line6: Shape (Frequency of shape)
+        Line7: Frequency of MFE in ensemble (Frequency); ensemble diversity (diversity)
 
     Remarks:
         The BPP structure gives an output structure based on the probabilitiy of that base pair
@@ -138,21 +142,21 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
         bottom left while the probability structure is in the top right.
 
 #### Example:
-    Assume you are in the CParty directory
-    ./build/CParty -i "/home/username/Desktop/myinputfile.txt"
-    ./build/CParty -i "/home/username/Desktop/myinputfile.txt" --o "outputfile.txt"
-    ./build/CParty -r "(............................)" GCAACGAUGACAUACAUCGCUAGUCGACGC
-    ./build/CParty -r "(((((.........................)))))................" -d2 GGGGGAAAAAAAGGGGGGGGGGAAAAAAAACCCCCAAAAAACCCCCCCCCC
-    ./build/CParty -p -r "(............................)" -o "/home/username/Desktop/some_folder/outputfile.txt" GCAACGAUGACAUACAUCGCUAGUCGACGC
-    ./build/CParty -n 3 -r "(............................)" -o "/home/username/Desktop/some_folder/outputfile.txt" GCAACGAUGACAUACAUCGCUAGUCGACGC
-    ./build/CParty -k -r "(............................)" GCAACGAUGACAUACAUCGCUAGUCGACGC
-    ./build/CParty -P "params/rna_Turner04.par" -r "(............................)" GCAACGAUGACAUACAUCGCUAGUCGACGC
-    ./build/CParty -s 10000 --noPS -r "(............................)" GCAACGAUGACAUACAUCGCUAGUCGACGC
+    Assume you are in the PRISM directory
+    ./build/PRISM -i "/home/username/Desktop/myinputfile.txt"
+    ./build/PRISM -i "/home/username/Desktop/myinputfile.txt" --o "outputfile.txt"
+    ./build/PRISM -r "(............................)" GCAACGAUGACAUACAUCGCUAGUCGACGC
+    ./build/PRISM -r "(((((.........................)))))................" -d2 GGGGGAAAAAAAGGGGGGGGGGAAAAAAAACCCCCAAAAAACCCCCCCCCC
+    ./build/PRISM -p -r "(............................)" -o "/home/username/Desktop/some_folder/outputfile.txt" GCAACGAUGACAUACAUCGCUAGUCGACGC
+    ./build/PRISM -n 3 -r "(............................)" -o "/home/username/Desktop/some_folder/outputfile.txt" GCAACGAUGACAUACAUCGCUAGUCGACGC
+    ./build/PRISM -k -r "(............................)" GCAACGAUGACAUACAUCGCUAGUCGACGC
+    ./build/PRISM -P "params/rna_Turner04.par" -r "(............................)" GCAACGAUGACAUACAUCGCUAGUCGACGC
+    ./build/PRISM -s 10000 --noPS -r "(............................)" GCAACGAUGACAUACAUCGCUAGUCGACGC
 
 
 
 ### SARS-CoV-2 Example
-    ./build/CParty -r "..(((((((((((..........)))))))))))....................................." UUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCU
+    ./build/PRISM -r "..(((((((((((..........)))))))))))....................................." UUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCU
 
     
 ## Questions
