@@ -54,6 +54,7 @@ void validateStructure(std::string &seq, std::string &structure) {
                 } else if (seq[i] == 'C' && seq[j] == 'G') {
                 } else if ((seq[i] == 'G' && seq[j] == 'C') || (seq[i] == 'G' && seq[j] == 'U')) {
                 } else if ((seq[i] == 'U' && seq[j] == 'G') || (seq[i] == 'U' && seq[j] == 'A')) {
+                } else if ((seq[i] == 'T' && seq[j] == 'A') || (seq[i] == 'A' && seq[j] == 'T')) {
                 } else {
                     std::cerr << "Incorrect input: " << seq[i] << " does not pair with " << seq[j] << std::endl;
                     exit(0);
