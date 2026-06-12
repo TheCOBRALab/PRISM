@@ -198,7 +198,7 @@ int main(int argc, char *argv[]) {
     // Hotspots
     std::vector<Hotspot> hotspot_list;
     vrna_param_s *params;
-    params = scale_parameters();
+    params = vrna_params(NULL);
     if (restricted != "") {
         Hotspot hotspot(1, restricted.length(), restricted.length() + 1);
         hotspot.set_structure(restricted);

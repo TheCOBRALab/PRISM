@@ -12,13 +12,16 @@
 #include <string>
 #include <vector>
 
-extern "C" {
-#include "ViennaRNA/loops/all.h"
-#include "ViennaRNA/pair_mat.h"
+#include "ViennaRNA/loops.hh"
+#include "ViennaRNA/pair_mat.hh"
 #include "ViennaRNA/params/io.h"
-}
+// extern "C" {
+// #include "ViennaRNA/loops/all.h"
+// #include "ViennaRNA/pair_mat.h"
+// #include "ViennaRNA/params/io.h"
+// }
 
-void get_hotspots(std::string seq, std::vector<Hotspot> &hotspot_list, SHAPEData &ShapeData, int max_hotspot, vrna_param_s *params);
+void get_hotspots(std::string seq, std::vector<Hotspot> &hotspot_list, SHAPEData &ShapeData, int max_hotspot, vrna_param_t *params);
 int distance(int left, int right);
 void expand_hotspot(s_energy_matrix *V, Hotspot &hotspot, int n);
 // Mateo 2024
@@ -75,7 +78,7 @@ class W_final {
     void backtrack_restricted(seq_interval *cur_interval, sparse_tree &tree);
     // backtrack, the restricted case
 
-    energy_t E_ext_Stem(const energy_t &vij, const energy_t &vi1j, const energy_t &vij1, const energy_t &vi1j1, const short *S, paramT *params,
+    energy_t E_ext_Stem(const energy_t &vij, const energy_t &vi1j, const energy_t &vij1, const energy_t &vi1j1, const short *S, vrna_param_t *params,
                         const cand_pos_t i, const cand_pos_t j, cand_pos_t n, std::vector<Node> &tree);
 };
 

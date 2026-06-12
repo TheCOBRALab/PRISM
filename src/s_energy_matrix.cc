@@ -72,7 +72,7 @@ s_energy_matrix::~s_energy_matrix()
  * @param vi1j1 The V(i+1,j-1) energy
  */
 energy_t s_energy_matrix::E_MLStem(const energy_t &vij, const energy_t &vi1j, const energy_t &vij1, const energy_t &vi1j1, const short *S,
-                                   paramT *params, cand_pos_t i, cand_pos_t j, const cand_pos_t &n, std::vector<Node> &tree) {
+                                   vrna_param_t *params, cand_pos_t i, cand_pos_t j, const cand_pos_t &n, std::vector<Node> &tree) {
 
     energy_t e = INF, en = INF;
 
@@ -142,7 +142,7 @@ energy_t s_energy_matrix::E_MLStem(const energy_t &vij, const energy_t &vi1j, co
  * @param dmli2 Row of WM2 from two iterations ago
  */
 energy_t s_energy_matrix::E_MbLoop(const energy_t WM2ij, const energy_t WM2ip1j, const energy_t WM2ijm1, const energy_t WM2ip1jm1, const short *S,
-                                   paramT *params, cand_pos_t i, cand_pos_t j, std::vector<Node> &tree) {
+                                   vrna_param_t *params, cand_pos_t i, cand_pos_t j, std::vector<Node> &tree) {
 
     energy_t e = INF, en = INF;
     pair_type tt = pair[S[j]][S[i]];
@@ -311,19 +311,19 @@ energy_t s_energy_matrix::compute_energy_VM_restricted(cand_pos_t i, cand_pos_t 
  * @param i The left index in the base pair
  * @param j The right index in the base pair
  */
-energy_t s_energy_matrix::HairpinE(const std::string &seq, const short *S, const short *S1, const paramT *params, cand_pos_t i, cand_pos_t j) {
+energy_t s_energy_matrix::HairpinE(const std::string &seq, const short *S, const short *S1, const vrna_param_t *params, cand_pos_t i, cand_pos_t j) {
 
     const int ptype_closing = pair[S[i]][S[j]];
 
     if (ptype_closing == 0) return INF;
 
-    return E_Hairpin(j - i - 1, ptype_closing, S1[i + 1], S1[j - 1], &seq.c_str()[i - 1], const_cast<paramT *>(params));
+    return E_Hairpin(j - i - 1, ptype_closing, S1[i + 1], S1[j - 1], &seq.c_str()[i - 1], const_cast<vrna_param_t *>(params));
 }
 
 /**
  * @brief restricted version
  */
-energy_t s_energy_matrix::compute_internal_restricted(cand_pos_t i, cand_pos_t j, const paramT *params, std::vector<int> &up) {
+energy_t s_energy_matrix::compute_internal_restricted(cand_pos_t i, cand_pos_t j, const vrna_param_t *params, std::vector<int> &up) {
     energy_t v_iloop = INF;
     cand_pos_t max_k = std::min(j - TURN - 2, i + MAXLOOP + 1);
     const int ptype_closing = pair[S_[i]][S_[j]];
@@ -334,7 +334,7 @@ energy_t s_energy_matrix::compute_internal_restricted(cand_pos_t i, cand_pos_t j
             for (cand_pos_t l = j - 1; l >= min_l; --l) {
                 if (up[j - 1] >= (j - l - 1)) {
                     energy_t v_iloop_kl = E_IntLoop(k - i - 1, j - l - 1, ptype_closing, rtype[pair[S_[k]][S_[l]]], S1_[i + 1], S1_[j - 1],
-                                                    S1_[k - 1], S1_[l + 1], const_cast<paramT *>(params))
+                                                    S1_[k - 1], S1_[l + 1], const_cast<vrna_param_t *>(params))
                                           + get_energy(k, l);
                     if(i+1==k && j-1==l) v_iloop_kl += ShapeData->get_calculated(i) + ShapeData->get_calculated(j);
                     v_iloop = std::min(v_iloop, v_iloop_kl);
@@ -345,21 +345,21 @@ energy_t s_energy_matrix::compute_internal_restricted(cand_pos_t i, cand_pos_t j
     return v_iloop;
 }
 
-energy_t s_energy_matrix::compute_stack(cand_pos_t i, cand_pos_t j, const paramT *params) {
+energy_t s_energy_matrix::compute_stack(cand_pos_t i, cand_pos_t j, const vrna_param_t *params) {
 
     const int ptype_closing = pair[S_[i]][S_[j]];
     cand_pos_t k = i + 1;
     cand_pos_t l = j - 1;
     return E_IntLoop(k - i - 1, j - l - 1, ptype_closing, rtype[pair[S_[k]][S_[l]]], S1_[i + 1], S1_[j - 1], S1_[k - 1], S1_[l + 1],
-                     const_cast<paramT *>(params))
+                     const_cast<vrna_param_t *>(params))
            + get_energy(k, l) + ShapeData->get_calculated(i) + ShapeData->get_calculated(j);
 }
 
-energy_t s_energy_matrix::compute_int(cand_pos_t i, cand_pos_t j, cand_pos_t k, cand_pos_t l, const paramT *params) {
+energy_t s_energy_matrix::compute_int(cand_pos_t i, cand_pos_t j, cand_pos_t k, cand_pos_t l, const vrna_param_t *params) {
 
     const int ptype_closing = pair[S_[i]][S_[j]];
     return E_IntLoop(k - i - 1, j - l - 1, ptype_closing, rtype[pair[S_[k]][S_[l]]], S1_[i + 1], S1_[j - 1], S1_[k - 1], S1_[l + 1],
-                     const_cast<paramT *>(params))
+                     const_cast<vrna_param_t *>(params))
            + get_energy(k, l);
 }
 

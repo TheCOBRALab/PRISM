@@ -3,17 +3,20 @@
 #include "base_types.hh"
 #include "sparse_tree.hh"
 #include "SHAPE.hh"
+#include "ViennaRNA/loops.hh"
+#include "ViennaRNA/pair_mat.hh"
+#include "ViennaRNA/params/io.h"
 #include <cstring>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
-extern "C" {
-#include "ViennaRNA/loops/all.h"
-#include "ViennaRNA/pair_mat.h"
-#include "ViennaRNA/params/default.h"
-#include "ViennaRNA/params/io.h"
-}
+// extern "C" {
+// #include "ViennaRNA/loops/all.h"
+// #include "ViennaRNA/pair_mat.h"
+// #include "ViennaRNA/params/default.h"
+// #include "ViennaRNA/params/io.h"
+// }
 
 /*
  * If the global use_mfelike_energies flag is set, truncate doubles to int

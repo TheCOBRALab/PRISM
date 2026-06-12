@@ -2,6 +2,7 @@
 #include "dot_plot.hh"
 #include "h_externs.hh"
 #include "pf_globals.hh"
+#include "ViennaRNA/utils.hh"
 
 #include <algorithm>
 #include <iostream>
@@ -12,7 +13,7 @@
 #define debug 0
 
 W_final_pf::W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &ShapeData, bool pk_free,bool pk_only, int dangle, double energy, int num_samples, bool print_samples, bool PSplot, double gamma)
-    : exp_params_(scale_pf_parameters()) {
+    : exp_params_(vrna_exp_params(NULL)) {
     this->seq = seq;
     this->MFE_structure = MFE_structure;
     this->n = seq.length();

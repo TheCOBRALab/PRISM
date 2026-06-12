@@ -609,11 +609,11 @@ energy_t pseudo_loop::get_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos
     }
 }
 
-energy_t pseudo_loop::compute_int(cand_pos_t i, cand_pos_t j, cand_pos_t k, cand_pos_t l, const paramT *params) {
+energy_t pseudo_loop::compute_int(cand_pos_t i, cand_pos_t j, cand_pos_t k, cand_pos_t l, const vrna_param_t *params) {
 
     const pair_type ptype_closing = pair[S_[i]][S_[j]];
     return E_IntLoop(k - i - 1, j - l - 1, ptype_closing, rtype[pair[S_[k]][S_[l]]], S1_[i + 1], S1_[j - 1], S1_[k - 1], S1_[l + 1],
-                     const_cast<paramT *>(params));
+                     const_cast<vrna_param_t *>(params));
 }
 
 energy_t pseudo_loop::get_e_stP(cand_pos_t i, cand_pos_t j) {

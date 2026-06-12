@@ -7,11 +7,14 @@
 #include <string>
 #include <vector>
 
-extern "C" {
-#include "ViennaRNA/loops/all.h"
-#include "ViennaRNA/pair_mat.h"
+#include "ViennaRNA/loops.hh"
+#include "ViennaRNA/pair_mat.hh"
 #include "ViennaRNA/params/io.h"
-}
+// extern "C" {
+// #include "ViennaRNA/loops/all.h"
+// #include "ViennaRNA/pair_mat.h"
+// #include "ViennaRNA/params/io.h"
+// }
 
 class s_energy_matrix {
   public:
@@ -72,16 +75,16 @@ class s_energy_matrix {
     // Mateo 13 Sept 2023
     void compute_hotspot_energy(cand_pos_t i, cand_pos_t j, bool is_stack);
 
-    energy_t HairpinE(const std::string &seq, const short *S, const short *S1, const paramT *params, cand_pos_t i, cand_pos_t j);
-    energy_t compute_stack(cand_pos_t i, cand_pos_t j, const paramT *params);
-    energy_t compute_internal_restricted(cand_pos_t i, cand_pos_t j, const paramT *params, std::vector<int> &up);
-    energy_t compute_int(cand_pos_t i, cand_pos_t j, cand_pos_t k, cand_pos_t l, const paramT *params);
+    energy_t HairpinE(const std::string &seq, const short *S, const short *S1, const vrna_param_t *params, cand_pos_t i, cand_pos_t j);
+    energy_t compute_stack(cand_pos_t i, cand_pos_t j, const vrna_param_t *params);
+    energy_t compute_internal_restricted(cand_pos_t i, cand_pos_t j, const vrna_param_t *params, std::vector<int> &up);
+    energy_t compute_int(cand_pos_t i, cand_pos_t j, cand_pos_t k, cand_pos_t l, const vrna_param_t *params);
 
     void compute_energy_WM_restricted(cand_pos_t i, cand_pos_t j, sparse_tree &tree, std::vector<energy_t> &WMB);
     energy_t compute_energy_VM_restricted(cand_pos_t i, cand_pos_t j, sparse_tree &tree);
-    energy_t E_MLStem(const energy_t &vij, const energy_t &vi1j, const energy_t &vij1, const energy_t &vi1j1, const short *S, paramT *params,
+    energy_t E_MLStem(const energy_t &vij, const energy_t &vi1j, const energy_t &vij1, const energy_t &vi1j1, const short *S, vrna_param_t *params,
                       cand_pos_t i, cand_pos_t j, const cand_pos_t &n, std::vector<Node> &tree);
-    energy_t E_MbLoop(const energy_t WM2ij, const energy_t WM2ip1j, const energy_t WM2ijm1, const energy_t WM2ip1jm1, const short *S, paramT *params,
+    energy_t E_MbLoop(const energy_t WM2ij, const energy_t WM2ip1j, const energy_t WM2ijm1, const energy_t WM2ip1jm1, const short *S, vrna_param_t *params,
                       cand_pos_t i, cand_pos_t j, std::vector<Node> &tree);
     void compute_WMv_WMp(cand_pos_t i, cand_pos_t j, energy_t WMB, std::vector<Node> &tree);
 

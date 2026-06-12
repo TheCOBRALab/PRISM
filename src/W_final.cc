@@ -13,7 +13,7 @@
 // to create all the matrixes required for simfold
 // and then calls allocate_space in here to allocate
 // space for WMB and V_final
-W_final::W_final(std::string seq, std::string res, SHAPEData &ShapeData, bool pk_free, bool pk_only, int dangle) : params_(scale_parameters()) {
+W_final::W_final(std::string seq, std::string res, SHAPEData &ShapeData, bool pk_free, bool pk_only, int dangle) : params_(vrna_params(NULL)) {
     seq_ = seq;
     this->res = res;
     this->n = seq.length();
@@ -122,7 +122,7 @@ double W_final::hfold(sparse_tree &tree) {
  * @param vij1 The V(i,j-1) energy
  * @param vi1j1 The V(i+1,j-1) energy
  */
-energy_t W_final::E_ext_Stem(const energy_t &vij, const energy_t &vi1j, const energy_t &vij1, const energy_t &vi1j1, const short *S, paramT *params,
+energy_t W_final::E_ext_Stem(const energy_t &vij, const energy_t &vi1j, const energy_t &vij1, const energy_t &vi1j1, const short *S, vrna_param_t *params,
                              const cand_pos_t i, const cand_pos_t j, cand_pos_t n, std::vector<Node> &tree) {
 
     energy_t e = INF, en = INF;
@@ -135,12 +135,12 @@ energy_t W_final::E_ext_Stem(const energy_t &vij, const energy_t &vi1j, const en
             if (params->model_details.dangles == 2) {
                 base_type si1 = i > 1 ? S[i - 1] : -1;
                 base_type sj1 = j < n ? S[j + 1] : -1;
-                en += vrna_E_ext_stem(tt, si1, sj1, params);
+                en += E_ExtLoop(tt, si1, sj1, params);
             } else {
-                en += vrna_E_ext_stem(tt, -1, -1, params);
+                en += E_ExtLoop(tt, -1, -1, params);
             }
 
-            e = MIN2(e, en);
+            e = std::min(e, en);
         }
     }
 
@@ -152,10 +152,10 @@ energy_t W_final::E_ext_Stem(const energy_t &vij, const energy_t &vi1j, const en
             if (en != INF) {
 
                 base_type si1 = S[i];
-                en += vrna_E_ext_stem(tt, si1, -1, params);
+                en += E_ExtLoop(tt, si1, -1, params);
             }
 
-            e = MIN2(e, en);
+            e = std::min(e, en);
         }
         tt = pair[S[i]][S[j - 1]];
         if (((tree[i].pair < -1 && tree[j - 1].pair < -1) || (tree[i].pair == j - 1)) && tree[j].pair < 0) {
@@ -164,9 +164,9 @@ energy_t W_final::E_ext_Stem(const energy_t &vij, const energy_t &vi1j, const en
 
                 base_type sj1 = S[j];
 
-                en += vrna_E_ext_stem(tt, -1, sj1, params);
+                en += E_ExtLoop(tt, -1, sj1, params);
             }
-            e = MIN2(e, en);
+            e = std::min(e, en);
         }
         tt = pair[S[i + 1]][S[j - 1]];
         if (((tree[i + 1].pair < -1 && tree[j - 1].pair < -1) || (tree[i + 1].pair == j - 1)) && tree[i].pair < 0 && tree[j].pair < 0) {
@@ -177,9 +177,9 @@ energy_t W_final::E_ext_Stem(const energy_t &vij, const energy_t &vi1j, const en
                 base_type si1 = S[i];
                 base_type sj1 = S[j];
 
-                en += vrna_E_ext_stem(tt, si1, sj1, params);
+                en += E_ExtLoop(tt, si1, sj1, params);
             }
-            e = MIN2(e, en);
+            e = std::min(e, en);
         }
     }
     return e;
@@ -773,7 +773,7 @@ void expand_hotspot(s_energy_matrix *V, Hotspot &hotspot, int n) {
     pair_type tt = pair[V->S_[i]][V->S_[j]];
     base_type si1 = i > 1 ? V->S_[i - 1] : -1;
     base_type sj1 = j < n ? V->S_[j + 1] : -1;
-    energy_t dangle_penalty = vrna_E_ext_stem(tt, si1, sj1, V->params_);
+    energy_t dangle_penalty = E_ExtLoop(tt, si1, sj1, V->params_);
 
     double energy = V->get_energy(hotspot.get_left_outer_index(), hotspot.get_right_outer_index());
 
