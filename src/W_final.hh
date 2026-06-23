@@ -14,12 +14,7 @@
 
 #include "ViennaRNA/loops.hh"
 #include "ViennaRNA/pair_mat.hh"
-#include "ViennaRNA/params/io.h"
-// extern "C" {
-// #include "ViennaRNA/loops/all.h"
-// #include "ViennaRNA/pair_mat.h"
-// #include "ViennaRNA/params/io.h"
-// }
+#include "ViennaRNA/params/io.hh"
 
 void get_hotspots(std::string seq, std::vector<Hotspot> &hotspot_list, SHAPEData &ShapeData, int max_hotspot, vrna_param_t *params);
 int distance(int left, int right);

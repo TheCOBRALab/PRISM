@@ -9,12 +9,7 @@
 
 #include "ViennaRNA/loops.hh"
 #include "ViennaRNA/pair_mat.hh"
-#include "ViennaRNA/params/io.h"
-// extern "C" {
-// #include "ViennaRNA/loops/all.h"
-// #include "ViennaRNA/pair_mat.h"
-// #include "ViennaRNA/params/io.h"
-// }
+#include "ViennaRNA/params/io.hh"
 
 class s_energy_matrix {
   public:
