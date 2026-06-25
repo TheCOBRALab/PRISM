@@ -220,7 +220,7 @@ void seqtoRNA(std::string &sequence) {
     }
 }
 
-void print_results(std::vector<Result> result_list, std::vector<std::vector<std::pair<std::string,double>>> fatgraphs, std::string &fileO, int number_of_output){
+void print_results(std::vector<Result> &result_list, std::vector<std::vector<std::pair<std::string,double>>> &fatgraphs, std::string &fileO, int number_of_output){
     if (fileO != "") {
         std::ofstream out(fileO,std::fstream::app);
         out << result_list[0].get_sequence() << std::endl;
