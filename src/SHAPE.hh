@@ -9,11 +9,11 @@
 class SHAPEData {
 
     private:
-        std::vector<double> calculated;  // pseudo-energy calculated SHAPE values, indexed by nucleotide position
-        std::vector<double> expcalculated; // Boltzmann variation of the calculated values
-        cand_pos_t n;
         double  slope;         // m parameter for linear conversion to energy bonus
         double  intercept;     // b parameter
+        cand_pos_t n;
+        std::vector<double> calculated;  // pseudo-energy calculated SHAPE values, indexed by nucleotide position
+        std::vector<double> expcalculated; // Boltzmann variation of the calculated values
 
         double calculate(double reactivity);
         bool exists(const std::string &filename);

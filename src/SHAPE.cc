@@ -7,39 +7,42 @@
 #include <cmath>
 
 
-SHAPEData::SHAPEData(const std::string &filename, cand_pos_t n, double slope, double intercept){
-    this->slope = slope;
-    this->intercept = intercept;
-    this->n = n;
-    this->calculated.resize(n+1,0);
-    this->expcalculated.resize(n+1,1);
-    if(exists(filename)){
-        std::string line;
-        std::ifstream in(filename);
-        std::getline(in,line);
-        in.close();
-        std::istringstream ss(line);
-        std::string token;
-        std::string name;
-        cand_pos_t length;
-        std::getline(ss, name, '\t');
-        std::getline(ss, token, '\t');
-        length = std::stoi(token);
-        std::getline(ss, token, '\t');
-        if(length>n){
-            std::cerr << "ERROR: Number of entries in file does not match length of sequence" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-        cand_pos_t i = 0;
-        while (std::getline(ss, token, '\t')) {
-            ++i;
-            if(token == "NULL") continue;
-            double reactivity = std::stod(token);
-            calculated[i] = 100*calculate(reactivity);
-            expcalculated[i] = calculated[i];
-        }
-    }
+SHAPEData::SHAPEData(const std::string &filename, cand_pos_t n, double slope, double intercept): slope(slope), intercept(intercept), n(n), calculated(n + 1, 0.0), expcalculated(n + 1, 1.0){
+    if (!exists(filename)) return;
 
+    std::ifstream in(filename);
+    std::string line;
+    if (!std::getline(in, line)) return;
+
+    std::istringstream ss(line);
+    auto nextToken = [&](std::string &tok) {
+        return static_cast<bool>(std::getline(ss, tok, '\t'));
+    };
+    std::string tok;
+    if (!nextToken(tok)) return;
+    // Determine if the first field is a name or the length.
+    // If it parses as an integer, there is no name field.
+    if (!std::isdigit(static_cast<unsigned char>(tok.front()))) {
+        // First token was the name; advance to the length field
+        if (!nextToken(tok)) return;
+    }
+    cand_pos_t length = static_cast<cand_pos_t>(std::stoi(tok));
+    if (length > n) {
+        std::cerr << "ERROR: SHAPE file length (" << length << ") exceeds sequence length (" << n << ")\n";
+        std::exit(EXIT_FAILURE);
+    }
+    // Skip the energy field
+    if (!nextToken(tok)) return;
+    // Read the reactivity portion
+    cand_pos_t i = 0;
+    while (nextToken(tok) && i < n) {
+        ++i;
+        if (tok == "NULL") continue;
+        double reactivity = std::stod(tok);
+        calculated[i] = 100.0 * calculate(reactivity);
+        expcalculated[i] = calculated[i];
+    }
+    in.close();
 }
 
 bool SHAPEData::exists(const std::string &filename) {
