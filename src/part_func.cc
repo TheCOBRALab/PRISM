@@ -187,7 +187,7 @@ pf_t W_final_pf::hfold_pf(sparse_tree &tree) {
     if (print_samples) {
         std::vector<std::pair<std::string,int>> str_list;
         for (const auto &s : structures) {
-            str_list.push_back(std::make_pair(s.first,s.second));
+            str_list.emplace_back(s.first,s.second);
         }
         sort(str_list.begin(), str_list.end(),[](auto &x,auto &y) {return x.second>y.second;} );
         for (const auto &s : str_list) {
@@ -254,16 +254,16 @@ pf_t W_final_pf::hfold_centroid(sparse_tree &tree){
 
 void W_final_pf::hfold_fatgraph(std::vector<std::pair<std::string,double>> &fatgraphs, int &num_fatgraphs){
     std::unordered_map<std::string, int> fatgraphs_map;
-    for(auto it: structures){
+    for(const auto &it: structures){
         std::string fatgraph = get_fatgraph(it.first);
         fatgraphs_map[fatgraph]+=it.second;
     }
     std::string fatgraph;
     int fatgraph_frequency = 0;
-    for(auto it: fatgraphs_map){
+    for(const auto &it: fatgraphs_map){
         fatgraph_frequency = it.second;
         fatgraph = it.first;
-        fatgraphs.push_back(std::make_pair(fatgraph,(double)fatgraph_frequency/num_samples));
+        fatgraphs.emplace_back(fatgraph,(double)fatgraph_frequency/num_samples);
     }
     std::sort(fatgraphs.begin(), fatgraphs.end(),[](std::pair<std::string,double> a, std::pair<std::string,double> b){ return a.second > b.second;});
     fatgraphs.resize(std::min(num_fatgraphs,(int)fatgraphs.size()));
@@ -800,9 +800,9 @@ std::vector<cand_pos_t> boustrophedon(cand_pos_t start, cand_pos_t end) {
     std::vector<cand_pos_t> seq;
 
     if (end >= start) {
-        seq.push_back(end - start + 1);
+        seq.emplace_back(end - start + 1);
         for (cand_pos_t pos = 1; pos <= end - start + 1; pos++)
-            seq.push_back(boustrophedon_at(start, end, pos));
+            seq.emplace_back(boustrophedon_at(start, end, pos));
     }
 
     return seq;
