@@ -360,7 +360,6 @@ int main(int argc, char *argv[]) {
         std::vector<Hotspot> hotspot_list;
         vrna_param_s *params;
         params = vrna_params(NULL);
-        std::cout << current.sequence << std::endl;
         if (restricted != "") {
             Hotspot hotspot(1, current.structure.length(), current.structure.length() + 1);
             hotspot.set_structure(current.structure);
