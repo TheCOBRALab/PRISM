@@ -272,7 +272,7 @@ void W_final_pf::hfold_fatgraph(std::vector<std::pair<std::string,double>> &fatg
 pf_t W_final_pf::exp_Extloop(cand_pos_t i, cand_pos_t j) {
     pair_type tt = pair[S_[i]][S_[j]];
 
-    if (exp_params_->model_details.dangles == 1 || exp_params_->model_details.dangles == 2) {
+    if (exp_params_->model_details.dangles == 2) {
         base_type si1 = i > 1 ? S_[i - 1] : -1;
         base_type sj1 = j < n ? S_[j + 1] : -1;
         return exp_E_ExtLoop(tt, si1, sj1, exp_params_);
@@ -283,7 +283,7 @@ pf_t W_final_pf::exp_Extloop(cand_pos_t i, cand_pos_t j) {
 
 pf_t W_final_pf::exp_MLstem(cand_pos_t i, cand_pos_t j) {
     pair_type tt = pair[S_[i]][S_[j]];
-    if (exp_params_->model_details.dangles == 1 || exp_params_->model_details.dangles == 2) {
+    if (exp_params_->model_details.dangles == 2) {
         base_type si1 = i > 1 ? S_[i - 1] : -1;
         base_type sj1 = j < n ? S_[j + 1] : -1;
         return exp_E_MLstem(tt, si1, sj1, exp_params_);
@@ -294,7 +294,7 @@ pf_t W_final_pf::exp_MLstem(cand_pos_t i, cand_pos_t j) {
 
 pf_t W_final_pf::exp_Mbloop(cand_pos_t i, cand_pos_t j) {
     pair_type tt = pair[S_[j]][S_[i]];
-    if (exp_params_->model_details.dangles == 1 || exp_params_->model_details.dangles == 2) {
+    if (exp_params_->model_details.dangles == 2) {
         base_type si1 = i > 1 ? S_[i + 1] : -1;
         base_type sj1 = j < n ? S_[j - 1] : -1;
         return exp_E_MLstem(tt, sj1, si1, exp_params_);
