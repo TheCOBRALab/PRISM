@@ -80,9 +80,7 @@ double W_final::hfold(sparse_tree &tree) {
         for (cand_pos_t k = 1; k <= j - TURN - 1; ++k) {
             if (tree.weakly_closed(1, k - 1)) {
                 energy_t acc = (k > 1) ? W[k - 1] : 0;
-                m2 = std::min(m2, acc
-                                      + E_ext_Stem(V->get_energy(k, j), V->get_energy(k + 1, j), V->get_energy(k, j - 1), V->get_energy(k + 1, j - 1),
-                                                   S_, params_, k, j, n, tree.tree));
+                m2 = std::min(m2, acc + E_ext_Stem(V->get_energy(k, j), V->get_energy(k + 1, j), V->get_energy(k, j - 1), V->get_energy(k + 1, j - 1), k, j, tree.tree));
                 if (k == 1 || tree.weakly_closed(k, j)) m3 = std::min(m3, acc + WMB->get_WMB(k, j) + PS_penalty);
             }
         }
@@ -112,77 +110,33 @@ double W_final::hfold(sparse_tree &tree) {
 }
 
 /**
- * @brief Gives the W(i,j) energy. The type of dangle model being used affects this energy.
+ * @brief Gives the W(i,j) energy. The type of dangle model being used affects this energy. 
  * The type of dangle is also changed to reflect this.
- *
- * Until the changes to fres, I am adding +1 to the ptype closing and Si and Sj's to make them match - Mateo 2024
- *
- * @param vij The V(i,j) energy
- * @param vi1j The V(i+1,j) energy
- * @param vij1 The V(i,j-1) energy
- * @param vi1j1 The V(i+1,j-1) energy
- */
-energy_t W_final::E_ext_Stem(const energy_t &vij, const energy_t &vi1j, const energy_t &vij1, const energy_t &vi1j1, const short *S, vrna_param_t *params,
-                             const cand_pos_t i, const cand_pos_t j, cand_pos_t n, std::vector<Node> &tree) {
+ * 
+*/
+energy_t W_final::E_ext_Stem(const energy_t& vij,const energy_t& vi1j,const energy_t& vij1,const energy_t& vi1j1, const cand_pos_t i,const cand_pos_t j, std::vector<Node> &tree){
 
-    energy_t e = INF, en = INF;
-    pair_type tt = pair[S[i]][S[j]];
+	energy_t e = INF;
 
-    if ((tree[i].pair < -1 && tree[j].pair < -1) || (tree[i].pair == j && tree[j].pair == i)) {
-        en = vij; // i j
+    auto consider = [&](energy_t v, bool valid, pair_type tt, base_type s5, base_type s3) {
+        if (!valid || v == INF) return;
+        e = std::min(e, v + E_ExtLoop(tt, s5, s3, params_));
+    };
+	base_type si1  = i > 1 ? S_[i-1] : -1;
+    base_type sj1  = j < n ? S_[j+1] : -1;
+    base_type si = S_[i];
+    base_type sj = S_[j];
 
-        if (en != INF) {
-            if (params->model_details.dangles == 2) {
-                base_type si1 = i > 1 ? S[i - 1] : -1;
-                base_type sj1 = j < n ? S[j + 1] : -1;
-                en += E_ExtLoop(tt, si1, sj1, params);
-            } else {
-                en += E_ExtLoop(tt, -1, -1, params);
-            }
+	bool dangle2 = params_->model_details.dangles == 2;
+    bool dangle1 = params_->model_details.dangles == 1;
 
-            e = std::min(e, en);
-        }
+	consider(vij, ((tree[i].pair < -1 && tree[j].pair < -1) || (tree[i].pair == j && tree[j].pair == i)), pair[S_[i]][S_[j]], dangle2 ? si1 : -1, dangle2 ? sj1 : -1);
+	if (dangle1) {
+        consider(vi1j,j-i-1>TURN && (((tree[i + 1].pair < -1 && tree[j].pair < -1) || (tree[i + 1].pair == j)) && tree[i].pair < 0), pair[S_[i+1]][S_[j]], si, -1);
+        consider(vij1,j-1-i>TURN && (((tree[i].pair < -1 && tree[j - 1].pair < -1) || (tree[i].pair == j - 1)) && tree[j].pair < 0), pair[S_[i]][S_[j-1]], -1, sj);
+        consider(vi1j1,j-1-i-1>TURN && (((tree[i + 1].pair < -1 && tree[j - 1].pair < -1) || (tree[i + 1].pair == j - 1)) && tree[i].pair < 0 && tree[j].pair < 0), pair[S_[i+1]][S_[j-1]], si, sj);
     }
-
-    if (params->model_details.dangles == 1) {
-        tt = pair[S[i + 1]][S[j]];
-        if (((tree[i + 1].pair < -1 && tree[j].pair < -1) || (tree[i + 1].pair == j)) && tree[i].pair < 0) {
-            en = (j - i - 1 > TURN) ? vi1j : INF; // i+1 j
-
-            if (en != INF) {
-
-                base_type si1 = S[i];
-                en += E_ExtLoop(tt, si1, -1, params);
-            }
-
-            e = std::min(e, en);
-        }
-        tt = pair[S[i]][S[j - 1]];
-        if (((tree[i].pair < -1 && tree[j - 1].pair < -1) || (tree[i].pair == j - 1)) && tree[j].pair < 0) {
-            en = (j - 1 - i > TURN) ? vij1 : INF; // i j-1
-            if (en != INF) {
-
-                base_type sj1 = S[j];
-
-                en += E_ExtLoop(tt, -1, sj1, params);
-            }
-            e = std::min(e, en);
-        }
-        tt = pair[S[i + 1]][S[j - 1]];
-        if (((tree[i + 1].pair < -1 && tree[j - 1].pair < -1) || (tree[i + 1].pair == j - 1)) && tree[i].pair < 0 && tree[j].pair < 0) {
-            en = (j - 1 - i - 1 > TURN) ? vi1j1 : INF; // i+1 j-1
-
-            if (en != INF) {
-
-                base_type si1 = S[i];
-                base_type sj1 = S[j];
-
-                en += E_ExtLoop(tt, si1, sj1, params);
-            }
-            e = std::min(e, en);
-        }
-    }
-    return e;
+	return e;
 }
 
 void W_final::backtrack_restricted(seq_interval *cur_interval, sparse_tree &tree) {

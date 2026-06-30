@@ -60,191 +60,76 @@ s_energy_matrix::~s_energy_matrix()
 // The destructor
 {}
 
+
 /**
- * @brief Gives the WM(i,j) energy. The type of dangle model being used affects this energy.
+ * @brief Gives the WM(i,j) energy. The type of dangle model being used affects this energy. 
  * The type of dangle is also changed to reflect this.
- *
- * I am adding +1 to all S as I haven't shifted the variables over to 1->n instead of 0->n-1
- *
- * @param vij The V(i,j) energy
- * @param vi1j The V(i+1,j) energy
- * @param vij1 The V(i,j-1) energy
- * @param vi1j1 The V(i+1,j-1) energy
- */
-energy_t s_energy_matrix::E_MLStem(const energy_t &vij, const energy_t &vi1j, const energy_t &vij1, const energy_t &vi1j1, const short *S,
-                                   vrna_param_t *params, cand_pos_t i, cand_pos_t j, const cand_pos_t &n, std::vector<Node> &tree) {
+ * 
+*/
+energy_t s_energy_matrix::E_MLStem(const energy_t& vij,const energy_t& vi1j,const energy_t& vij1,const energy_t& vi1j1,cand_pos_t i, cand_pos_t j, std::vector<Node> &tree){
 
-    energy_t e = INF, en = INF;
+	energy_t e = INF;
 
-    pair_type type = pair[S[i]][S[j]];
+    auto consider = [&](energy_t v, bool valid, pair_type type, base_type s5, base_type s3, int ml_count) {
+        if (!valid || v == INF) return;
+        e = std::min(e, v + E_MLstem(type, s5, s3, params_) + ml_count * params_->MLbase);
+    };
 
-    if ((tree[i].pair < -1 && tree[j].pair < -1) || (tree[i].pair == j)) {
-        en = vij; // i j
-        if (en != INF) {
-            if (params->model_details.dangles == 2) {
-                base_type mm5 = i > 1 ? S[i - 1] : -1;
-                base_type mm3 = j < n ? S[j + 1] : -1;
-                en += E_MLstem(type, mm5, mm3, params);
-            } else {
-                en += E_MLstem(type, -1, -1, params);
-            }
-            e = std::min(e, en);
-        }
-    }
-    if (params->model_details.dangles == 1) {
-        const base_type mm5 = S[i], mm3 = S[j];
+	base_type si1  = i > 1 ? S_[i-1] : -1;
+    base_type sj1  = j < n ? S_[j+1] : -1;
+    base_type si = S_[i];
+    base_type sj = S_[j];
 
-        if (((tree[i + 1].pair < -1 && tree[j].pair < -1) || (tree[i + 1].pair == j)) && tree[i].pair < 0) {
-            en = (j - i - 1 > TURN) ? vi1j : INF; // i+1 j
-            if (en != INF) {
-                en += params->MLbase;
+	bool dangle2 = params_->model_details.dangles == 2;
+    bool dangle1 = params_->model_details.dangles == 1;
 
-                type = pair[S[i + 1]][S[j]];
-                en += E_MLstem(type, mm5, -1, params);
-
-                e = std::min(e, en);
-            }
-        }
-
-        if (((tree[i].pair < -1 && tree[j - 1].pair < -1) || (tree[i].pair == j - 1)) && tree[j].pair < 0) {
-            en = (j - 1 - i > TURN) ? vij1 : INF; // i j-1
-            if (en != INF) {
-                en += params->MLbase;
-
-                type = pair[S[i]][S[j - 1]];
-                en += E_MLstem(type, -1, mm3, params);
-
-                e = std::min(e, en);
-            }
-        }
-        if (((tree[i + 1].pair < -1 && tree[j - 1].pair < -1) || (tree[i + 1].pair == j - 1)) && tree[i].pair < 0 && tree[j].pair < 0) {
-            en = (j - 1 - i - 1 > TURN) ? vi1j1 : INF; // i+1 j-1
-            if (en != INF) {
-                en += 2 * params->MLbase;
-
-                type = pair[S[i + 1]][S[j - 1]];
-                en += E_MLstem(type, mm5, mm3, params);
-
-                e = std::min(e, en);
-            }
-        }
-    }
-
+	consider(vij, (tree[i].pair < -1 && tree[j].pair < -1) || (tree[i].pair == j), pair[S_[i]][S_[j]], dangle2 ? si1 : -1, dangle2 ? sj1 : -1, 0);
+	if (dangle1) {
+		consider(vi1j,j-i-1>TURN && (((tree[i + 1].pair < -1 && tree[j].pair < -1) || (tree[i + 1].pair == j)) && tree[i].pair < 0), pair[S_[i+1]][S_[j]], si, -1, 1);
+        consider(vij1,j-1-i>TURN && (((tree[i].pair < -1 && tree[j - 1].pair < -1) || (tree[i].pair == j - 1)) && tree[j].pair < 0), pair[S_[i]][S_[j-1]], -1, sj, 1);
+        consider(vi1j1,j-1-i-1>TURN && (((tree[i + 1].pair < -1 && tree[j - 1].pair < -1) || (tree[i + 1].pair == j - 1)) && tree[i].pair < 0 && tree[j].pair < 0), pair[S_[i+1]][S_[j-1]], si, sj, 2);
+	}
     return e;
 }
 
 /**
- * @brief Computes the multiloop V contribution. This gives back essentially VM(i,j).
- *
- * Added plus 1 to all S's as I haven't changed it over to 1->n from 0->n-1
- *
- * @param dmli1 Row of WM2 from one iteration ago
- * @param dmli2 Row of WM2 from two iterations ago
- */
-energy_t s_energy_matrix::E_MbLoop(const energy_t WM2ij, const energy_t WM2ip1j, const energy_t WM2ijm1, const energy_t WM2ip1jm1, const short *S,
-                                   vrna_param_t *params, cand_pos_t i, cand_pos_t j, std::vector<Node> &tree) {
+* @brief Computes the multiloop V contribution. This gives back essentially VM(i,j).
+* 
+*/
+energy_t s_energy_matrix::E_MbLoop(const energy_t WM2ij, const energy_t WM2ip1j, const energy_t WM2ijm1, const energy_t WM2ip1jm1, cand_pos_t i, cand_pos_t j, std::vector<Node> &tree){
+	energy_t e = INF;
 
-    energy_t e = INF, en = INF;
-    pair_type tt = pair[S[j]][S[i]];
     bool pairable = (tree[i].pair < -1 && tree[j].pair < -1) || (tree[i].pair == j);
+    pair_type tt = pair[S_[j]][S_[i]];
+    base_type si1 = S_[i+1];
+    base_type sj1 = S_[j-1];
 
-    /* double dangles */
-    switch (params->model_details.dangles) {
-    case 2:
-        if (pairable) {
-            e = WM2ij;
+	auto consider = [&](energy_t v, bool check, base_type s5, base_type s3, int ml_count) {
+        if (check && v == INF) return;
+        e = std::min(e, v + E_MLstem(tt, s5, s3, params_) + params_->MLclosing + ml_count * params_->MLbase);
+    };
 
-            if (e != INF) {
+	bool dangle2 = params_->model_details.dangles == 2;
+    bool dangle1 = params_->model_details.dangles == 1;
 
-                base_type si1 = S[i + 1];
-                base_type sj1 = S[j - 1];
-
-                e += E_MLstem(tt, sj1, si1, params) + params->MLclosing;
-            }
-        }
-        break;
-
-    case 1:
-        /**
-         * ML pair D0
-         *  new closing pair (i,j) with mb part [i+1,j-1]
-         */
-
-        if (pairable) {
-            e = WM2ij;
-
-            if (e != INF) {
-
-                e += E_MLstem(tt, -1, -1, params) + params->MLclosing;
-            }
-        }
-        /**
-         * ML pair 5
-         * new closing pair (i,j) with mb part [i+2,j-1]
-         */
-
-        if (pairable && tree[i + 1].pair < 0) {
-            en = WM2ip1j;
-
-            if (en != INF) {
-
-                base_type si1 = S[i + 1];
-
-                en += E_MLstem(tt, -1, si1, params) + params->MLclosing + params->MLbase;
-            }
-        }
-        e = std::min(e, en);
-
-        /**
-         * ML pair 3
-         * new closing pair (i,j) with mb part [i+1, j-2]
-         */
-        if (pairable && tree[j - 1].pair < 0) {
-            en = WM2ijm1;
-
-            if (en != INF) {
-                base_type sj1 = S[j - 1];
-
-                en += E_MLstem(tt, sj1, -1, params) + params->MLclosing + params->MLbase;
-            }
-        }
-        e = std::min(e, en);
-        /**
-         * ML pair 53
-         * new closing pair (i,j) with mb part [i+2.j-2]
-         */
-        if (pairable && tree[i + 1].pair < 0 && tree[j - 1].pair < 0) {
-            en = WM2ip1jm1;
-
-            if (en != INF) {
-
-                base_type si1 = S[i + 1];
-                base_type sj1 = S[j - 1];
-
-                en += E_MLstem(tt, sj1, si1, params) + params->MLclosing + 2 * params->MLbase;
-            }
-        }
-        e = std::min(e, en);
-        break;
-    case 0:
-        if (pairable) {
-            e = WM2ij;
-
-            if (e != INF) {
-                e += E_MLstem(tt, -1, -1, params) + params->MLclosing;
-            }
-        }
-        break;
-    }
-
-    return e;
+	consider(WM2ij,pairable, dangle2 ? si1 : -1, dangle2 ? sj1 : -1, 0);
+	if(dangle1){
+		// ML pair 5 — closing (i,j) with mb part [i+2, j-1]
+		consider(WM2ip1j,pairable && tree[i+1].pair < 0, -1, si1, 1);
+        // ML pair 3 — closing (i,j) with mb part [i+1, j-2]
+        consider(WM2ijm1,pairable && tree[j-1].pair < 0, sj1, -1, 1);
+        // ML pair 53 — closing (i,j) with mb part [i+2, j-2]
+        consider(WM2ip1jm1,pairable && tree[i+1].pair < 0 && tree[j-1].pair < 0, sj1, si1, 2);
+	}
+	return e;
 }
+
 void s_energy_matrix::compute_WMv_WMp(cand_pos_t i, cand_pos_t j, energy_t WMB, std::vector<Node> &tree) {
     if (j - i + 1 < 4) return;
     cand_pos_t ij = index[(i)] + (j) - (i);
     cand_pos_t ijminus1 = index[(i)] + (j)-1 - (i);
 
-    WMv[ij] = E_MLStem(get_energy(i, j), get_energy(i + 1, j), get_energy(i, j - 1), get_energy(i + 1, j - 1), S_, params_, i, j, n, tree);
+    WMv[ij] = E_MLStem(get_energy(i, j), get_energy(i + 1, j), get_energy(i, j - 1), get_energy(i + 1, j - 1), i, j, tree);
     WMp[ij] = WMB + PSM_penalty + b_penalty;
     if (tree[j].pair <= -1) {
         energy_t tmp = WMv[ijminus1] + params_->MLbase;
@@ -265,7 +150,7 @@ void s_energy_matrix::compute_energy_WM_restricted(cand_pos_t i, cand_pos_t j, s
 
     for (cand_pos_t k = j - TURN - 1; k >= i; --k) {
         cand_pos_t kj = index[k] + j - k;
-        energy_t wm_kj = E_MLStem(get_energy(k, j), get_energy(k + 1, j), get_energy(k, j - 1), get_energy(k + 1, j - 1), S_, params_, k, j, n, tree.tree);
+        energy_t wm_kj = E_MLStem(get_energy(k, j), get_energy(k + 1, j), get_energy(k, j - 1), get_energy(k + 1, j - 1), k, j, tree.tree);
         energy_t wmb_kj = WMB[kj] + PSM_penalty + b_penalty;
         bool can_pair = tree.up[k - 1] >= (k - i);
         if (can_pair) m1 = std::min(m1, static_cast<energy_t>((k - i) * params_->MLbase) + wm_kj);
@@ -301,7 +186,7 @@ energy_t s_energy_matrix::compute_energy_VM_restricted(cand_pos_t i, cand_pos_t 
         if (tree.up[k - 2] >= (k - (i + 2)))
             WM2ip1jm1 = std::min(WM2ip1jm1, static_cast<energy_t>((k - (i + 1) - 1) * params_->MLbase) + get_energy_WMp(k, j - 2));
 
-        min = std::min(min, E_MbLoop(WM2ij, WM2ip1j, WM2ijm1, WM2ip1jm1, S_, params_, i, j, tree.tree));
+        min = std::min(min, E_MbLoop(WM2ij, WM2ip1j, WM2ijm1, WM2ip1jm1, i, j, tree.tree));
     }
     return min;
 }

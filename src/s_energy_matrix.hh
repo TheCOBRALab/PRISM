@@ -77,10 +77,8 @@ class s_energy_matrix {
 
     void compute_energy_WM_restricted(cand_pos_t i, cand_pos_t j, sparse_tree &tree, std::vector<energy_t> &WMB);
     energy_t compute_energy_VM_restricted(cand_pos_t i, cand_pos_t j, sparse_tree &tree);
-    energy_t E_MLStem(const energy_t &vij, const energy_t &vi1j, const energy_t &vij1, const energy_t &vi1j1, const short *S, vrna_param_t *params,
-                      cand_pos_t i, cand_pos_t j, const cand_pos_t &n, std::vector<Node> &tree);
-    energy_t E_MbLoop(const energy_t WM2ij, const energy_t WM2ip1j, const energy_t WM2ijm1, const energy_t WM2ip1jm1, const short *S, vrna_param_t *params,
-                      cand_pos_t i, cand_pos_t j, std::vector<Node> &tree);
+    energy_t E_MLStem(const energy_t& vij,const energy_t& vi1j,const energy_t& vij1,const energy_t& vi1j1,cand_pos_t i, cand_pos_t j, std::vector<Node> &tree);
+    energy_t E_MbLoop(const energy_t WM2ij, const energy_t WM2ip1j, const energy_t WM2ijm1, const energy_t WM2ip1jm1, cand_pos_t i, cand_pos_t j, std::vector<Node> &tree);
     void compute_WMv_WMp(cand_pos_t i, cand_pos_t j, energy_t WMB, std::vector<Node> &tree);
 
     // better to have protected variable rather than private, it's necessary for Hfold
