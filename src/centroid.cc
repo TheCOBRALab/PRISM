@@ -128,73 +128,53 @@ std::string W_final_pf::compute_centroid_PK_only(sparse_tree &tree, pf_t &dist, 
  * This should ensure that I am always
 */
 void generate_pt(std::string &structure, std::vector<int> &fres, std::vector<int> &up, int n){
-   std::vector<int> paren;
-   std::vector<int> sb;
-   int count = 0;
-   for(int j = 0;j<n;++j){
-      if(structure[j] == '('){
-          paren.push_back(j);
-          count = 0;
-      }
-      else if(structure[j] == '['){
-          sb.push_back(j);
-          count = 0;
-      }
-      else if(structure[j] == ')'){
-          int i = paren.back();
-          fres[i] = j;
-          fres[j] = i;
-          paren.pop_back();
-          count = 0;
-      }
-      else if(structure[j] == ']'){
-          int i = sb.back();
-          fres[i] = j;
-          fres[j] = i;
-          sb.pop_back();
-          count = 0;
-      }
-      else{
-        ++count;
-        up[j] = count;
-      }
-   }
-   if(!paren.empty() && !sb.empty()){
-       std::cout << "Error: stacks aren't empty" << std::endl;
-       exit(0);
-   }
+    std::vector<int> paren,square;
+    int count = 0;
+
+    for(int j = 0;j<n;++j){
+        switch(structure[j]){
+            case '(': paren.push_back(j); count = 0; break;
+            case '[': square.push_back(j); count = 0; break;
+            case ')': { int i = paren.back();  paren.pop_back();  fres[i] = j; fres[j] = i; count = 0; break; }
+            case ']': { int i = square.back(); square.pop_back(); fres[i] = j; fres[j] = i; count = 0; break; }
+            default:  up[j] = ++count; break;
+        }
+    }
+    for(auto *stack : {&paren, &square}){
+        if(!stack->empty()){
+            std::cerr << "Error: unmatched brackets in: " << structure << std::endl;
+            exit(1);
+        }
+    }
 }
 // i and j are the structured part
 static inline bool empty_region(const std::vector<int> &up, int i, int j){
-    if(up[j-1]>=j-i-1) return true;
-    return false;
+    return up[j-1] >= j-i-1;
 }
 // By having a function that deals with the fatgraph index on a per bracket type basis, it will be easier to expand this later if needed
 static inline void process_bracket(std::string &structure, std::string &fatgraph, std::string &fatgraph_full, cand_pos_t j,const std::vector<int> &fres,const  std::vector<int> &up,std::vector<int> &stack, char open, char close){
     if(structure[j] == open){
-          if(stack.empty()){
-            stack.push_back(j);
+        /**
+         * Three cases: 1) There is nothing in there yet, so it's new and should be added
+         * 2 and 3) There is something (i.e. another bracket type) between the last added bracket of this type
+         * and our current one; therefore, it's not and internal loop/stack and should be added
+         */
+        bool update = stack.empty() || !empty_region(up,stack.back(),j) ||  !empty_region(up,fres[j],fres[stack.back()]);
+        if(update){
             fatgraph_full[j] = open;
-            fatgraph+=open;
-          } else {
-              cand_pos_t pparent = stack.back();
-              if (!empty_region(up,pparent,j) || !empty_region(up,fres[j],fres[pparent])){
-                stack.push_back(j);
-                fatgraph_full[j] = open;
-                fatgraph+=open;
-              }else{
-                stack.push_back(j);
-              }
-          }
-      }
-      if(structure[j] == close){
-          cand_pos_t i = stack.back();
-          stack.pop_back();
-          if(fatgraph_full[i] == open){
-              fatgraph_full[j] = close;
-              fatgraph+=close;
-          }
-      }
+            fatgraph += open;
+        }
+        stack.push_back(j);
+    } else if(structure[j] == close){ 
+        cand_pos_t i = stack.back();
+        stack.pop_back();
+        // Fatgraph full is the n-length version which makes it easier to do checks
+        // If we have it in fatgraph full, then that means it was unique and the close should be added.
+        if(fatgraph_full[i] == open){
+            fatgraph_full[j] = close;
+            fatgraph+=close;
+        }
+    }
 }
 
 std::string generate_fatgraph(std::string &structure,const std::vector<int> &fres,const  std::vector<int> &up, const cand_pos_t n){
@@ -210,49 +190,39 @@ std::string generate_fatgraph(std::string &structure,const std::vector<int> &fre
    return fatgraph;
 }
 
-std::string postprocess_fatgraph(std::string &structure){
-    cand_pos_t n = structure.length();
-    std::vector<int> paren;
-    std::vector<int> sb;
-    std::vector<std::pair<int,int>> pairs;
-    for(int j = 0;j<n;++j){
-        if(structure[j] == '('){
-            paren.push_back(j);
+/**
+ * Write out a consistent format where parentheses come first, then square brackets, then etc.
+ */
+std::string canonicalize_fatgraph(const std::string &fatgraph){
+    std::string canonicalized = fatgraph;
+    const std::string openers = "([{<";
+    const std::string closers = ")]}>";
+    auto opener_idx = [](char c) -> int {
+        switch(c){
+            case '(': return 0;
+            case '[': return 1;
+            case '{': return 2;
+            case '<': return 3;
+            default: return -1;
         }
-        else if(structure[j] == '['){
-            sb.push_back(j);
-        }
-        else if(structure[j] == ')'){
-            int i = paren.back();
-            pairs.push_back(std::make_pair(i,j));
-            paren.pop_back();
-        }
-        else if(structure[j] == ']'){
-            int i = sb.back();
-            pairs.push_back(std::make_pair(i,j));
-            sb.pop_back();
-        }
-    }
-    std::sort(pairs.begin(), pairs.end(), [](const std::pair<int,int> &a, const std::pair<int,int> &b){return a.first < b.first;});
-    std::string new_structure(n,'.');
-    if(!pairs.empty()){
-        std::pair<int,int> last = pairs[0];
-        new_structure[last.first] = '(';
-        new_structure[last.second] = ')';
-        for(std::pair<int,int> pair: pairs){
-            if(!(pair.first>last.first && pair.second<last.second) && !(pair.first>last.second && pair.second>last.second)) continue;
-            new_structure[pair.first] = '(';
-            new_structure[pair.second] = ')';
-            if(!(pair.first>last.first && pair.second<last.second)) last = pair;
-        }
-        for(std::pair<cand_pos_t,cand_pos_t> pair: pairs){
-            if(new_structure[pair.first] == '.'){
-                new_structure[pair.first] = '[';
-                new_structure[pair.second] = ']';
-            }
+    };
+    std::unordered_map<char,char> remap;
+    int next_type = 0;
+
+    for(char c : fatgraph){
+        int idx = opener_idx(c);
+        if(idx >= 0 && remap.count(c) == 0){
+            remap[c]           = openers[next_type];
+            remap[closers[idx]] = closers[next_type];
+            ++next_type;
         }
     }
-    return new_structure;
+
+    for(char &c : canonicalized){
+        if(remap.count(c)) c = remap[c];
+    }
+
+    return canonicalized;
 }
 
 std::string W_final_pf::get_fatgraph(std::string structure){
@@ -262,6 +232,6 @@ std::string W_final_pf::get_fatgraph(std::string structure){
     generate_pt(structure,fres,up,n);
 
     std::string fatgraph = generate_fatgraph(structure,fres,up,n);
-    fatgraph = postprocess_fatgraph(fatgraph);
+    fatgraph = canonicalize_fatgraph(fatgraph);
     return fatgraph;
 }
