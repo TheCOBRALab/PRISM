@@ -139,7 +139,7 @@ void s_energy_matrix::compute_WMv_WMp(cand_pos_t i, cand_pos_t j, energy_t WMB, 
     }
 }
 
-void s_energy_matrix::compute_energy_WM_restricted(cand_pos_t i, cand_pos_t j, sparse_tree &tree, std::vector<energy_t> &WMB)
+void s_energy_matrix::compute_energy_WM_restricted(cand_pos_t i, cand_pos_t j, sparse_tree &tree, TriangleMatrix &WMB)
 // compute de MFE of a partial multi-loop closed at (i,j), the restricted case
 {
     if (j - i + 1 < 4) return;

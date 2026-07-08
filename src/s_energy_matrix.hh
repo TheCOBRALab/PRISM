@@ -4,6 +4,7 @@
 #include "base_types.hh"
 #include "sparse_tree.hh"
 #include "SHAPE.hh"
+#include "matrices.hh"
 #include <string>
 #include <vector>
 
@@ -75,7 +76,7 @@ class s_energy_matrix {
     energy_t compute_internal_restricted(cand_pos_t i, cand_pos_t j, const vrna_param_t *params, std::vector<int> &up);
     energy_t compute_int(cand_pos_t i, cand_pos_t j, cand_pos_t k, cand_pos_t l, const vrna_param_t *params);
 
-    void compute_energy_WM_restricted(cand_pos_t i, cand_pos_t j, sparse_tree &tree, std::vector<energy_t> &WMB);
+    void compute_energy_WM_restricted(cand_pos_t i, cand_pos_t j, sparse_tree &tree, TriangleMatrix &WMB);
     energy_t compute_energy_VM_restricted(cand_pos_t i, cand_pos_t j, sparse_tree &tree);
     energy_t E_MLStem(const energy_t& vij,const energy_t& vi1j,const energy_t& vij1,const energy_t& vi1j1,cand_pos_t i, cand_pos_t j, std::vector<Node> &tree);
     energy_t E_MbLoop(const energy_t WM2ij, const energy_t WM2ip1j, const energy_t WM2ijm1, const energy_t WM2ip1jm1, cand_pos_t i, cand_pos_t j, std::vector<Node> &tree);

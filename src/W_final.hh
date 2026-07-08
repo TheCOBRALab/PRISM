@@ -8,6 +8,7 @@
 #include "s_energy_matrix.hh"
 #include "sparse_tree.hh"
 #include "SHAPE.hh"
+#include "matrices.hh"
 #include <cstring>
 #include <string>
 #include <vector>

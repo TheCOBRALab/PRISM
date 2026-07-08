@@ -5,6 +5,7 @@
 #include "h_struct.hh"
 #include "s_energy_matrix.hh"
 #include "SHAPE.hh"
+#include "matrices.hh"
 #include <stdio.h>
 #include <string.h>
 
@@ -24,17 +25,22 @@ class pseudo_loop {
     // energy_t get_energy(cand_pos_t i, cand_pos_t j);
     // in order to be able to check the border values consistantly
     // I am adding these get functions
-    energy_t get_WI(cand_pos_t i, cand_pos_t j);
-    energy_t get_WIP(cand_pos_t i, cand_pos_t j);
+    energy_t get_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t jp, sparse_tree &tree) {
+        // Hosna, March 16, 2012,
+        // i and j should be at least 3 bases apart
+        if (j - i >= TURN && i >= 1 && i <= ip && ip < jp && jp <= j && j <= n && tree.tree[i].pair >= 0 && tree.tree[j].pair >= 0
+            && tree.tree[ip].pair >= 0 && tree.tree[jp].pair >= 0 && tree.tree[i].pair == j && tree.tree[j].pair == i && tree.tree[ip].pair == jp
+            && tree.tree[jp].pair == ip) {
+            if (i == ip && j == jp && i < j) {
+                return 0;
+            }
+            cand_pos_t iip = index[i] + ip - i;
 
-    energy_t get_VP(cand_pos_t i, cand_pos_t j);
-    energy_t get_VPL(cand_pos_t i, cand_pos_t j);
-    energy_t get_VPR(cand_pos_t i, cand_pos_t j);
-    energy_t get_WMB(cand_pos_t i, cand_pos_t j);
-    energy_t get_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t jp, sparse_tree &tree);
-
-    energy_t get_WMBP(cand_pos_t i, cand_pos_t j);
-    energy_t get_WMBW(cand_pos_t i, cand_pos_t j);
+            return BE[iip];
+        } else {
+            return INF;
+        }
+    }
 
     void back_track(std::string structure, minimum_fold *f, seq_interval *cur_interval, sparse_tree &tree);
 
@@ -42,7 +48,7 @@ class pseudo_loop {
     seq_interval *get_stack_interval() { return stack_interval; }
     std::string get_structure() { return structure; }
     minimum_fold *get_minimum_fold() { return f; }
-    std::vector<energy_t> WMB; // the main loop for pseudoloops and bands
+    TriangleMatrix WMB; // the main loop for pseudoloops and bands
 
   private:
     cand_pos_t n;
@@ -57,15 +63,14 @@ class pseudo_loop {
     vrna_param_t *params_;
     SHAPEData *ShapeData;
 
-    // Hosna
-    std::vector<energy_t> WI;   // the loop inside a pseudoknot (in general it looks like a W but is inside a pseudoknot)
-    std::vector<energy_t> VP;   // the loop corresponding to the pseudoknotted region of WMB
-    std::vector<energy_t> VPL;  // the loop corresponding to the pseudoknotted region of WMB
-    std::vector<energy_t> VPR;  // the loop corresponding to the pseudoknotted region of WMB
-    std::vector<energy_t> WMBP; // the main loop to calculate WMB
-    std::vector<energy_t> WMBW;
-    std::vector<energy_t> WIP;     // the loop corresponding to WI'
-    std::vector<energy_t> BE;      // the loop corresponding to BE
+    TriangleMatrix WI;   // the loop inside a pseudoknot (in general it looks like a W but is inside a pseudoknot)
+    TriangleMatrix VP;   // the loop corresponding to the pseudoknotted region of WMB
+    TriangleMatrix VPL;  // the loop corresponding to the pseudoknotted region of WMB
+    TriangleMatrix VPR;  // the loop corresponding to the pseudoknotted region of WMB
+    TriangleMatrix WMBP; // the main loop to calculate WMB
+    TriangleMatrix WMBW;
+    TriangleMatrix WIP;     // the loop corresponding to WI'
+    TriangleMatrix BE;      // the loop corresponding to BE
     std::vector<cand_pos_t> index; // the array to keep the index of two dimensional arrays like WI and weakly_closed
 
     short *S_;

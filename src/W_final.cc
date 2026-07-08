@@ -67,7 +67,7 @@ double W_final::hfold(sparse_tree &tree) {
 
             if (!pk_free) WMB->compute_energies(i, j, tree);
 
-            V->compute_WMv_WMp(i, j, WMB->get_WMB(i, j), tree.tree);
+            V->compute_WMv_WMp(i, j, WMB->WMB.get(i, j), tree.tree);
             V->compute_energy_WM_restricted(i, j, tree, WMB->WMB);
         }
     }
@@ -81,7 +81,7 @@ double W_final::hfold(sparse_tree &tree) {
             if (tree.weakly_closed(1, k - 1)) {
                 energy_t acc = (k > 1) ? W[k - 1] : 0;
                 m2 = std::min(m2, acc + E_ext_Stem(V->get_energy(k, j), V->get_energy(k + 1, j), V->get_energy(k, j - 1), V->get_energy(k + 1, j - 1), k, j, tree.tree));
-                if (k == 1 || tree.weakly_closed(k, j)) m3 = std::min(m3, acc + WMB->get_WMB(k, j) + PS_penalty);
+                if (k == 1 || tree.weakly_closed(k, j)) m3 = std::min(m3, acc + WMB->WMB.get(k, j) + PS_penalty);
             }
         }
         W[j] = std::min({m1, m2, m3});
@@ -411,7 +411,7 @@ void W_final::backtrack_restricted(seq_interval *cur_interval, sparse_tree &tree
 
                 acc = (i - 1 > 0) ? W[i - 1] : 0;
 
-                energy_ij = WMB->get_WMB(i, j);
+                energy_ij = WMB->WMB.get(i, j);
 
                 if (energy_ij < INF) {
                     tmp = energy_ij + PS_penalty + acc;
@@ -424,7 +424,7 @@ void W_final::backtrack_restricted(seq_interval *cur_interval, sparse_tree &tree
                 }
 
                 if (tree.tree[i].pair <= -1 && i + 1 < j) {
-                    energy_ij = WMB->get_WMB(i + 1, j);
+                    energy_ij = WMB->WMB.get(i + 1, j);
                     if (energy_ij < INF) {
                         tmp = energy_ij + PS_penalty + acc;
                         if (tmp < min) {
@@ -436,7 +436,7 @@ void W_final::backtrack_restricted(seq_interval *cur_interval, sparse_tree &tree
                 }
 
                 if (tree.tree[j].pair <= -1 && i < j - 1) {
-                    energy_ij = WMB->get_WMB(i, j - 1);
+                    energy_ij = WMB->WMB.get(i, j - 1);
                     if (energy_ij < INF) {
                         tmp = energy_ij + PS_penalty + acc;
                         if (tmp < min) {
@@ -448,7 +448,7 @@ void W_final::backtrack_restricted(seq_interval *cur_interval, sparse_tree &tree
                 }
 
                 if (tree.tree[i].pair <= -1 && tree.tree[j].pair <= -1 && i + 1 < j - 1) {
-                    energy_ij = WMB->get_WMB(i + 1, j - 1);
+                    energy_ij = WMB->WMB.get(i + 1, j - 1);
                     if (energy_ij < INF) {
                         tmp = energy_ij + PS_penalty + acc;
                         if (tmp < min) {
@@ -645,7 +645,7 @@ void W_final::backtrack_restricted(seq_interval *cur_interval, sparse_tree &tree
         int min = INF;
         int best_row;
 
-        min = WMB->get_WMB(i, j) + PSM_penalty + b_penalty;
+        min = WMB->WMB.get(i, j) + PSM_penalty + b_penalty;
         best_row = 1;
         if (tree.tree[j].pair < 0) {
             energy_t tmp = V->get_energy_WMp(i, j - 1) + params_->MLbase;

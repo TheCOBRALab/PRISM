@@ -3,6 +3,7 @@
 #include "base_types.hh"
 #include "sparse_tree.hh"
 #include "SHAPE.hh"
+#include "matrices.hh"
 #include "ViennaRNA/loops.hh"
 #include "ViennaRNA/pair_mat.hh"
 #include "ViennaRNA/params/io.hh"
@@ -68,71 +69,10 @@ class W_final_pf {
 
     vrna_exp_param_t *exp_params_;
 
-    pf_t get_energy(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return V[ij];
-    }
-    pf_t get_energy_VM(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return VM[ij];
-    }
-    pf_t get_energy_WM(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return WM[ij];
-    }
-    pf_t get_energy_WMv(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return WMv[ij];
-    }
-    pf_t get_energy_WMp(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return WMp[ij];
-    }
-
     pf_t get_energy_WI(cand_pos_t i, cand_pos_t j) {
         if (i > j) return 1;
         cand_pos_t ij = index[i] + j - i;
         return WI[ij];
-    }
-    pf_t get_energy_WIP(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return WIP[ij];
-    }
-    pf_t get_energy_VP(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return VP[ij];
-    }
-    pf_t get_energy_VPL(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return VPL[ij];
-    }
-    pf_t get_energy_VPR(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return VPR[ij];
-    }
-    pf_t get_energy_WMB(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return WMB[ij];
-    }
-    pf_t get_energy_WMBP(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return WMBP[ij];
-    }
-    pf_t get_energy_WMBW(cand_pos_t i, cand_pos_t j) {
-        if (i >= j) return 0;
-        cand_pos_t ij = index[i] + j - i;
-        return WMBW[ij];
     }
     pf_t get_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t jp, sparse_tree &tree) {
         // Hosna, March 16, 2012,
@@ -165,22 +105,22 @@ class W_final_pf {
     short *S_;
     short *S1_;
 
-    std::vector<pf_t> V;
-    std::vector<pf_t> VM;
-    std::vector<pf_t> WMv;
-    std::vector<pf_t> WMp;
-    std::vector<pf_t> WM;
+    TriangleMatrixPF V;
+    TriangleMatrixPF VM;
+    TriangleMatrixPF WMv;
+    TriangleMatrixPF WMp;
+    TriangleMatrixPF WM;
     std::vector<pf_t> W;
 
-    std::vector<pf_t> WI;   // the loop inside a pseudoknot (in general it looks like a W but is inside a pseudoknot)
-    std::vector<pf_t> VP;   // the loop corresponding to the pseudoknotted region of WMB
-    std::vector<pf_t> VPL;  // the loop corresponding to the pseudoknotted region of WMB
-    std::vector<pf_t> VPR;  // the loop corresponding to the pseudoknotted region of WMB
-    std::vector<pf_t> WMB;  // the main loop for pseudoloops and bands
-    std::vector<pf_t> WMBP; // the main loop to calculate WMB
-    std::vector<pf_t> WMBW;
-    std::vector<pf_t> WIP; // the loop corresponding to WI'
-    std::vector<pf_t> BE;  // the loop corresponding to BE
+    TriangleMatrixPF WI;   // the loop inside a pseudoknot (in general it looks like a W but is inside a pseudoknot)
+    TriangleMatrixPF VP;   // the loop corresponding to the pseudoknotted region of WMB
+    TriangleMatrixPF VPL;  // the loop corresponding to the pseudoknotted region of WMB
+    TriangleMatrixPF VPR;  // the loop corresponding to the pseudoknotted region of WMB
+    TriangleMatrixPF WMB;  // the main loop for pseudoloops and bands
+    TriangleMatrixPF WMBP; // the main loop to calculate WMB
+    TriangleMatrixPF WMBW;
+    TriangleMatrixPF WIP; // the loop corresponding to WI'
+    TriangleMatrixPF BE;  // the loop corresponding to BE
 
     std::vector<pf_t> scale;
     std::vector<pf_t> expMLbase;
