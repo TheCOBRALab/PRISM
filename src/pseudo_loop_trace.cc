@@ -314,14 +314,14 @@ void pseudo_loop::Trace_WIP(cand_pos_t i, cand_pos_t j, energy_t e){
         return;
     }
     for (cand_pos_t k = i + 1; k < j - TURN - 1; ++k) {
-        if (e == WIP.get(i,k-1) + get_energy(k,j)) {
+        if (e == WIP.get(i,k-1) + get_energy(k,j) + bp_penalty) {
             Trace_WIP(i,k-1,WIP.get(i,k-1));
             Trace_V(k,j,get_energy(k,j));
             return;
         }
     }
     for (cand_pos_t k = i + 1; k < j - TURN - 1; ++k) {
-        if (e == WIP.get(i,k-1) + WMB.get(k,j)) {
+        if (e == WIP.get(i,k-1) + WMB.get(k,j) + PSM_penalty + bp_penalty) {
             Trace_WIP(i,k-1,WIP.get(i,k-1));
             Trace_WMB(k,j,WMB.get(k,j));
             return;
@@ -329,14 +329,14 @@ void pseudo_loop::Trace_WIP(cand_pos_t i, cand_pos_t j, energy_t e){
     }
     for (cand_pos_t k = i + 1; k < j - TURN - 1; ++k) {
         bool can_pair = tree->up[k - 1] >= (k - i);
-        if (can_pair && e == static_cast<energy_t>((k-i)*cp_penalty) + get_energy(k,j)){
+        if (can_pair && e == static_cast<energy_t>((k-i)*cp_penalty) + get_energy(k,j) + bp_penalty){
             Trace_V(k,j,get_energy(k,j));
             return;
         }
     }
     for (cand_pos_t k = i + 1; k < j - TURN - 1; ++k) {
         bool can_pair = tree->up[k - 1] >= (k - i);
-        if (can_pair && e == static_cast<energy_t>((k-i)*cp_penalty) + WMB.get(k,j)){
+        if (can_pair && e == static_cast<energy_t>((k-i)*cp_penalty) + WMB.get(k,j) + PSM_penalty + bp_penalty){
             Trace_WMB(k,j,WMB.get(k,j));
             return;
         }

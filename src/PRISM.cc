@@ -383,7 +383,6 @@ int main(int argc, char *argv[]) {
             sparse_tree tree(structure, n);
             std::string final_structure = hfold(current.sequence, structure, energy, tree,ShapeData, pk_free, pk_only, dangles);
             std::string final_structure_pf = hfold_pf(current.sequence, final_structure, energy_pf,MEA_structure,MEA,centroid_structure,fatgraphs[i],distance,frequency, diversity,num_fatgraph, tree,ShapeData, pk_free,pk_only, dangles, energy, num_samples, print_samples, PSplot, gamma);
-
             if (!args_info.input_structure_given && energy > 0.0) {
                 energy = 0.0;
                 energy_pf = 0.0;
