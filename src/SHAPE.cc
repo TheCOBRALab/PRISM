@@ -9,14 +9,14 @@
 
 SHAPEData::SHAPEData(const std::string &filename, cand_pos_t n, double slope, double intercept): slope(slope), intercept(intercept), n(n), calculated(n + 1, 0.0), expcalculated(n + 1, 1.0){
     if (!exists(filename)) return;
-
+    
     std::ifstream in(filename);
     std::string line;
     if (!std::getline(in, line)) return;
 
     std::istringstream ss(line);
     auto nextToken = [&](std::string &tok) {
-        return static_cast<bool>(std::getline(ss, tok, '\t'));
+        return static_cast<bool>(ss >> tok);
     };
     std::string tok;
     if (!nextToken(tok)) return;

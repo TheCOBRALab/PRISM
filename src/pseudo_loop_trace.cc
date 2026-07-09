@@ -105,7 +105,6 @@ void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 					tmp += E_MLstem(pair[S_[j]][S_[i]],-1,-1,params_);
 				}
 				if (e==tmp){
-                    if(i==58 && j==334) std::cout << "here1" << std::endl;
 					tmp -= params_->MLclosing;
 					tmp -= (params_->model_details.dangles == 2 ? E_MLstem(pair[S_[j]][S_[i]],S_[j-1],S_[i+1],params_) : E_MLstem(pair[S_[j]][S_[i]],-1,-1,params_));
 					Trace_WM(i+1,k-1,WM.get(i+1,k-1));
@@ -118,7 +117,6 @@ void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 				}
 				tmp = static_cast<energy_t>((k-i-1)*params_->MLbase + WMp.get(k,j-1))+ E_MLstem(pair[S_[j]][S_[i]],-1,-1,params_) + params_->MLclosing;
 				if (e==tmp){
-                    if(i==58 && j==334) std::cout << "here2" << std::endl;
 					Trace_WMp(k,j-1,WMp.get(k,j-1));
 					return;
 				}
@@ -480,7 +478,7 @@ void pseudo_loop::Trace_VP(cand_pos_t i, cand_pos_t j, energy_t e){
     }
     pair_type ptype_closingip1jm1 = pair[S_[i+1]][S_[j-1]];
     if (tree->tree[i+1].pair < 0 && tree->tree[j-1].pair < 0 && ptype_closingip1jm1 > 0) {
-        if (e == get_e_stP(i,j) + VP.get(i+1,j-1) + ShapeData->get_calculated(i) + ShapeData->get_calculated(j)) {
+        if (e == (energy_t) (get_e_stP(i,j) + VP.get(i+1,j-1) + ShapeData->get_calculated(i) + ShapeData->get_calculated(j))) {
             Trace_VP(i+1,j-1,VP.get(i+1,j-1));
             return;
         }
