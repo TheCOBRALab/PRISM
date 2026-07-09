@@ -326,33 +326,34 @@ int main(int argc, char *argv[]) {
 
     int num_fatgraph = args_info.fatgraph_given ? args_info.fatgraph_arg : 1;
 
-    if(args_info.paramFile_given){
-        std::string file = args_info.paramFile_arg;
-        if (exists(file)) vrna_params_load(file.c_str(), VRNA_PARAMETER_FORMAT_DEFAULT);
-        else{
-            std::cerr << "Not a valid parameter file!" << std::endl;
-            exit(EXIT_FAILURE);
-        }
-    } else {
-        if (seq.find('T') != std::string::npos) {
-            vrna_params_load_DNA_Mathews2004();
-        } else{
-            std::string file = std::string(PARAMS_DIR) + "/rna_DirksPierce09.par";
-            if (exists(file)) vrna_params_load(file.c_str(), VRNA_PARAMETER_FORMAT_DEFAULT);
-            else{
-                std::cerr << "Not a valid parameter file!" << std::endl;
-                exit(EXIT_FAILURE);
-            }
-        }
-    }
-
     std::vector<RNAEntry> Inputs = get_all_inputs(fileI,seq,restricted);
 
     for(RNAEntry current : Inputs){
         cand_pos_t n = current.sequence.length();
         std::transform(current.sequence.begin(), current.sequence.end(), current.sequence.begin(), ::toupper);
-        if (!args_info.noConv_given) seqtoRNA(current.sequence);
+	    if(!args_info.noConv_flag) seqtoRNA(current.sequence);
         if (pk_free) if (current.structure == "") current.structure = std::string(n,'.');
+
+        if(args_info.paramFile_given){
+        std::string file = args_info.paramFile_arg;
+        if (exists(file)) vrna_params_load(file.c_str(), VRNA_PARAMETER_FORMAT_DEFAULT);
+            else{
+                std::cerr << "Not a valid parameter file!" << std::endl;
+                exit(EXIT_FAILURE);
+            }
+        } else {
+            if (current.sequence.find('T') != std::string::npos) {
+                noGU = 1;
+                vrna_params_load_DNA_Mathews2004();
+            } else{
+                std::string file = std::string(PARAMS_DIR) + "/rna_DirksPierce09.par";
+                if (exists(file)) vrna_params_load(file.c_str(), VRNA_PARAMETER_FORMAT_DEFAULT);
+                else{
+                    std::cerr << "Not a valid parameter file!" << std::endl;
+                    exit(EXIT_FAILURE);
+                }
+            }
+        }
 
         SHAPEData ShapeData(shapeFile,n);
 
@@ -360,7 +361,7 @@ int main(int argc, char *argv[]) {
         std::vector<Hotspot> hotspot_list;
         vrna_param_s *params;
         params = vrna_params(NULL);
-        if (restricted != "") {
+        if (current.structure != "") {
             Hotspot hotspot(1, current.structure.length(), current.structure.length() + 1);
             hotspot.set_structure(current.structure);
             hotspot_list.push_back(hotspot);

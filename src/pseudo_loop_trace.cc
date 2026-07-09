@@ -64,7 +64,7 @@ void pseudo_loop::Trace_W(cand_pos_t i, cand_pos_t j, energy_t e){
 			return;
 		}
 	}
-	__builtin_unreachable();
+	UNREACHABLE();
 }
 void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 	if (debug) printf("V at %d and %d as type: %c with %d\n", i, j,get_type(i,j), e);
@@ -83,6 +83,7 @@ void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 				for (cand_pos_t l = j-1; l >= min_l; --l)
 				{
 					energy_t tmp = compute_int(i,j,k,l) + get_energy(k,l);
+                    if(i+1==k && j-1==l) tmp += ShapeData->get_calculated(i) + ShapeData->get_calculated(j);
 					if (e == tmp)
 					{
 						Trace_V(k,l,get_energy(k,l));
@@ -95,7 +96,8 @@ void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 		break;
 		case MULTI: {
 			energy_t tmp = INF;
-			for (cand_pos_t k = i+1; k <= j-1; k++){
+			for (cand_pos_t k = i+1; k <= j-1; ++k){
+                if(i==58 && j==334) printf("k is %d and e is %d and WM is %d and WMv is %d and total is %d\n",k,e,WM.get(i+1,k-1),WMv.get(k,j-1),WM.get(i+1,k-1) + std::min(WMv.get(k,j-1),WMp.get(k,j-1)) + params_->MLclosing + E_MLstem(pair[S_[j]][S_[i]],S_[j-1],S_[i+1],params_));
 				tmp = WM.get(i+1,k-1) + std::min(WMv.get(k,j-1),WMp.get(k,j-1)) + params_->MLclosing;
 				if(params_->model_details.dangles == 2){
 					tmp += E_MLstem(pair[S_[j]][S_[i]],S_[j-1],S_[i+1],params_);
@@ -103,6 +105,7 @@ void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 					tmp += E_MLstem(pair[S_[j]][S_[i]],-1,-1,params_);
 				}
 				if (e==tmp){
+                    if(i==58 && j==334) std::cout << "here1" << std::endl;
 					tmp -= params_->MLclosing;
 					tmp -= (params_->model_details.dangles == 2 ? E_MLstem(pair[S_[j]][S_[i]],S_[j-1],S_[i+1],params_) : E_MLstem(pair[S_[j]][S_[i]],-1,-1,params_));
 					Trace_WM(i+1,k-1,WM.get(i+1,k-1));
@@ -113,16 +116,15 @@ void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 					}
 					return;
 				}
-
 				tmp = static_cast<energy_t>((k-i-1)*params_->MLbase + WMp.get(k,j-1))+ E_MLstem(pair[S_[j]][S_[i]],-1,-1,params_) + params_->MLclosing;
 				if (e==tmp){
+                    if(i==58 && j==334) std::cout << "here2" << std::endl;
 					Trace_WMp(k,j-1,WMp.get(k,j-1));
 					return;
 				}
 				if(params_->model_details.dangles ==1){
 					tmp = WM.get(i+2,k-1) + std::min(WMv.get(k,j-1),WMp.get(k,j-1)) + E_MLstem(pair[S_[j]][S_[i]],-1,S_[i+1],params_) + params_->MLclosing + params_->MLbase;
-					if (e==tmp)
-					{
+					if (e==tmp){
 						tmp -= (params_->MLclosing + E_MLstem(pair[S_[j]][S_[i]],-1,S_[i+1],params_) + params_->MLbase);
 						Trace_WM(i+2,k-1,WM.get(i+2,k-1));
 						if(tmp == WM.get(i+2,k-1) + WMv.get(k,j-1)){
@@ -133,8 +135,7 @@ void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 						return;
 					}
 					tmp = WM.get(i+1,k-1) + std::min(WMv.get(k,j-2),WMp.get(k,j-2)) + E_MLstem(pair[S_[j]][S_[i]],S_[j-1],-1,params_) + params_->MLclosing + params_->MLbase;
-					if (e==tmp)
-					{
+					if (e==tmp){
 						tmp -= (params_->MLclosing + E_MLstem(pair[S_[j]][S_[i]],S_[j-1],-1,params_) + params_->MLbase);
 						Trace_WM(i+1,k-1,WM.get(i+1,k-1));
 						if(tmp == WM.get(i+1,k-1) + WMv.get(k,j-2)){
@@ -145,8 +146,7 @@ void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 						return;
 					}
 					tmp = WM.get(i+2,k-1) + std::min(WMv.get(k,j-2),WMp.get(k,j-2)) + E_MLstem(pair[S_[j]][S_[i]],S_[j-1],S_[i+1],params_) + params_->MLclosing + 2*params_->MLbase;
-					if (e==tmp)
-					{
+					if (e==tmp){
 						tmp -= (params_->MLclosing + E_MLstem(pair[S_[j]][S_[i]],S_[j-1],S_[i+1],params_) + 2*params_->MLbase);
 						Trace_WM(i+2,k-1,WM.get(i+2,k-1));
 						if(tmp == WM.get(i+2,k-1) + WMv.get(k,j-2)){
@@ -156,7 +156,6 @@ void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 						}
 						return;
 					}
-
 					if((k-(i+1)-1) >=0) tmp = static_cast<energy_t>((k-(i+1)-1)*params_->MLbase) + WMp.get(k,j-1) + E_MLstem(pair[S_[j]][S_[i]],-1,S_[i+1],params_) + params_->MLclosing + params_->MLbase;
 					if (e==tmp){
 						Trace_WMp(k,j-1,WMp.get(k, j-1));
@@ -167,18 +166,17 @@ void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 						Trace_WMp(k,j-2,WMp.get(k, j-2));
 						return;
 					}
-					
 					if((k-(i+1)-1) >=0) tmp = static_cast<energy_t>((k-(i+1)-1)*params_->MLbase) + WMp.get(k,j-2) + E_MLstem(pair[S_[j]][S_[i]],S_[j-1],S_[i+1],params_) + params_->MLclosing + 2*params_->MLbase;
 					if (e==tmp){
 						Trace_WMp(k,j-2,WMp.get(k, j-2));
 						return;
-					}	
+					}
 				}				
 			}
 		}
 		break;
 	}
-	__builtin_unreachable();
+	UNREACHABLE();
 }
 void pseudo_loop::Trace_WM(cand_pos_t i, cand_pos_t j, energy_t e){
 	if (debug) printf("WM at %d and %d with %d\n", i, j, e);
@@ -213,7 +211,7 @@ void pseudo_loop::Trace_WM(cand_pos_t i, cand_pos_t j, energy_t e){
 			return;
 		}
 	}
-	__builtin_unreachable();
+	UNREACHABLE();
 }
 void pseudo_loop::Trace_WMv(cand_pos_t i, cand_pos_t j, energy_t e){
 	if (debug) printf("WMv at %d and %d with %d\n", i, j, e);
@@ -254,7 +252,7 @@ void pseudo_loop::Trace_WMv(cand_pos_t i, cand_pos_t j, energy_t e){
 		Trace_WMv(i,j-1,WMv.get(i,j-1));
 		return;
 	}
-	__builtin_unreachable();
+	UNREACHABLE();
 }
 void pseudo_loop::Trace_WMp(cand_pos_t i, cand_pos_t j, energy_t e){
 	if (debug) printf("WMp at %d and %d with %d\n", i, j, e);
@@ -268,7 +266,7 @@ void pseudo_loop::Trace_WMp(cand_pos_t i, cand_pos_t j, energy_t e){
 		Trace_WMp(i,j-1,WMp.get(i,j-1));
 		return;
 	}
-	__builtin_unreachable();
+	UNREACHABLE();
 }
 
 void pseudo_loop::Trace_WI(cand_pos_t i, cand_pos_t j, energy_t e){
@@ -300,7 +298,7 @@ void pseudo_loop::Trace_WI(cand_pos_t i, cand_pos_t j, energy_t e){
             return;
         }
     }
-    __builtin_unreachable();
+    UNREACHABLE();
 }
 
 void pseudo_loop::Trace_WIP(cand_pos_t i, cand_pos_t j, energy_t e){
@@ -345,7 +343,7 @@ void pseudo_loop::Trace_WIP(cand_pos_t i, cand_pos_t j, energy_t e){
             return;
         }
     }
-    __builtin_unreachable();
+    UNREACHABLE();
 }
 void pseudo_loop::Trace_WMB(cand_pos_t i, cand_pos_t j, energy_t e){
     if (debug) printf("WMB at %d and %d with %d\n", i, j, e);
@@ -367,7 +365,7 @@ void pseudo_loop::Trace_WMB(cand_pos_t i, cand_pos_t j, energy_t e){
                 }
             }
         }
-    __builtin_unreachable();
+    UNREACHABLE();
 }
 void pseudo_loop::Trace_WMBP(cand_pos_t i, cand_pos_t j, energy_t e){
     if (debug) printf("WMBP at %d and %d with %d\n", i, j, e);
@@ -433,7 +431,7 @@ void pseudo_loop::Trace_WMBP(cand_pos_t i, cand_pos_t j, energy_t e){
             }
         }
 
-    __builtin_unreachable();
+    UNREACHABLE();
 }
 void pseudo_loop::Trace_WMBW(cand_pos_t i, cand_pos_t j, energy_t e){
     if (debug) printf("WMBW at %d and %d with %d\n", i, j, e);
@@ -450,7 +448,7 @@ void pseudo_loop::Trace_WMBW(cand_pos_t i, cand_pos_t j, energy_t e){
         }
     }
 
-    __builtin_unreachable();
+    UNREACHABLE();
 }
 void pseudo_loop::Trace_VP(cand_pos_t i, cand_pos_t j, energy_t e){
     if (debug) printf("VP at %d and %d with %d\n", i, j, e);
@@ -482,7 +480,7 @@ void pseudo_loop::Trace_VP(cand_pos_t i, cand_pos_t j, energy_t e){
     }
     pair_type ptype_closingip1jm1 = pair[S_[i+1]][S_[j-1]];
     if (tree->tree[i+1].pair < 0 && tree->tree[j-1].pair < 0 && ptype_closingip1jm1 > 0) {
-        if (e == get_e_stP(i,j) + VP.get(i+1,j-1)) {
+        if (e == get_e_stP(i,j) + VP.get(i+1,j-1) + ShapeData->get_calculated(i) + ShapeData->get_calculated(j)) {
             Trace_VP(i+1,j-1,VP.get(i+1,j-1));
             return;
         }
@@ -537,7 +535,7 @@ void pseudo_loop::Trace_VP(cand_pos_t i, cand_pos_t j, energy_t e){
             return;
         }
     }
-    __builtin_unreachable();
+    UNREACHABLE();
 }
 void pseudo_loop::Trace_VPL(cand_pos_t i, cand_pos_t j, energy_t e){
     if (debug) printf("VPL at %d and %d with %d\n", i, j, e);
@@ -549,7 +547,7 @@ void pseudo_loop::Trace_VPL(cand_pos_t i, cand_pos_t j, energy_t e){
             return;
         }
     }
-    __builtin_unreachable();
+    UNREACHABLE();
 }
 void pseudo_loop::Trace_VPR(cand_pos_t i, cand_pos_t j, energy_t e){
     if (debug) printf("VPR at %d and %d with %d\n", i, j, e);
@@ -569,7 +567,7 @@ void pseudo_loop::Trace_VPR(cand_pos_t i, cand_pos_t j, energy_t e){
             return;
         }
     }
-    __builtin_unreachable();
+    UNREACHABLE();
 }
 void pseudo_loop::Trace_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t jp, energy_t e){
     if (debug) printf("BE at %d and %d with %d\n", i, j, e);
@@ -621,5 +619,5 @@ void pseudo_loop::Trace_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t
             }
         }
     }
-    __builtin_unreachable();
+    UNREACHABLE();
 }

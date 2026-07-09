@@ -88,10 +88,8 @@ inline int E_Hairpin(int size, int type, int si1, int sj1,const char *string,vrn
     energy = P->hairpin[size];
   else
     energy = P->hairpin[30] + (int)(P->lxc * log((size) / 30.));
-
   if (size < 3)
     return energy;            /* should only be the case when folding alignments */
-
   if ((string) && (P->model_details.special_hp)) {
     if (size == 4) {
       /* check for tetraloop bonus */
@@ -122,9 +120,7 @@ inline int E_Hairpin(int size, int type, int si1, int sj1,const char *string,vrn
       return energy + (type > 2 ? P->TerminalAU : 0);
     }
   }
-
   energy += P->mismatchH[type][si1][sj1];
-
   return energy;
 }
 

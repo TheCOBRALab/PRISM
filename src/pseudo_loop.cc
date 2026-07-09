@@ -10,11 +10,11 @@ pseudo_loop::pseudo_loop(std::string seq, std::string res, sparse_tree &tree, SH
     this->tree = &tree;
     this->ShapeData = &ShapeData;
     params_->model_details.dangles = dangle;
+    make_pair_matrix();
     S_ = encode_sequence(seq.c_str(), 0);
     S1_ = encode_sequence(seq.c_str(), 1);
     this->pk_free = pk_free;
     this->pk_only = pk_only;
-    make_pair_matrix();
     allocate_space();
 }
 
@@ -125,7 +125,7 @@ energy_t pseudo_loop::compute_energy_VM_restricted(cand_pos_t i, cand_pos_t j)
 {
     energy_t min = INF;
     for (cand_pos_t k = i + 1; k <= j - TURN - 1; ++k) {
-        energy_t WM2ij = WM.get(i + 1, k - 1) + WMv.get(k, j - 1);
+        energy_t WM2ij = WM.get(i+1,k-1) + WMv.get(k,j-1);
         WM2ij = std::min(WM2ij, WM.get(i + 1, k - 1) + WMp.get(k, j - 1));
         if (tree->up[k - 1] >= (k - (i + 1))) WM2ij = std::min(WM2ij, static_cast<energy_t>((k - i - 1) * params_->MLbase) + WMp.get(k, j - 1));
 
@@ -143,7 +143,6 @@ energy_t pseudo_loop::compute_energy_VM_restricted(cand_pos_t i, cand_pos_t j)
         WM2ip1jm1 = std::min(WM2ip1jm1, WM.get(i + 2, k - 1) + WMp.get(k, j - 2));
         if (tree->up[k - 2] >= (k - (i + 2)))
             WM2ip1jm1 = std::min(WM2ip1jm1, static_cast<energy_t>((k - (i + 1) - 1) * params_->MLbase) + WMp.get(k, j - 2));
-
         min = std::min(min, E_MbLoop(WM2ij, WM2ip1j, WM2ijm1, WM2ip1jm1, i, j));
     }
     return min;
@@ -369,7 +368,7 @@ void pseudo_loop::compute_VP(cand_pos_t i, cand_pos_t j) {
     // 4) NOT_paired(i+1) and NOT_paired(j-1) and they can pair together
     pair_type ptype_closingip1jm1 = pair[S_[i + 1]][S_[j - 1]];
     if ((tree->tree[i + 1].pair) < -1 && (tree->tree[j - 1].pair) < -1 && ptype_closingip1jm1 > 0) {
-        m4 = get_e_stP(i, j) + VP.get(i + 1, j - 1);
+        m4 = get_e_stP(i, j) + VP.get(i + 1, j - 1) + ShapeData->get_calculated(i) + ShapeData->get_calculated(j);
     }
 
     // 5) NOT_paired(r) and NOT_paired(rp)
@@ -620,7 +619,6 @@ energy_t pseudo_loop::HairpinE(const std::string &seq, cand_pos_t i, cand_pos_t 
     const int ptype_closing = pair[S_[i]][S_[j]];
 
     if (ptype_closing == 0) return INF;
-
     return E_Hairpin(j - i - 1, ptype_closing, S1_[i + 1], S1_[j - 1], &seq.c_str()[i - 1], const_cast<vrna_param_t *>(params_));
 }
 /**
@@ -740,7 +738,7 @@ energy_t pseudo_loop::E_MbLoop(const energy_t WM2ij, const energy_t WM2ip1j, con
 	bool dangle2 = params_->model_details.dangles == 2;
     bool dangle1 = params_->model_details.dangles == 1;
 
-	consider(WM2ij,pairable, dangle2 ? si1 : -1, dangle2 ? sj1 : -1, 0);
+	consider(WM2ij,pairable, dangle2 ? sj1 : -1, dangle2 ? si1 : -1, 0);
 	if(dangle1){
 		// ML pair 5 — closing (i,j) with mb part [i+2, j-1]
 		consider(WM2ip1j,pairable && tree->tree[i+1].pair < 0, -1, si1, 1);
