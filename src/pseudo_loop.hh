@@ -15,20 +15,15 @@
 
 #define debug 0
 
-// #ifdef NDEBUG
-// 	#define UNREACHABLE() __builtin_unreachable()
-// #else
-// 	#define UNREACHABLE() \
-// 		do { \
-// 			std::cerr << "Reached unreachable at line " << __LINE__ << " in File: " << __FILE__ << std::endl; \
-// 			abort(); \
-// 		} while(0)
-// #endif
-#define UNREACHABLE() \
+#ifdef NDEBUG
+	#define UNREACHABLE() __builtin_unreachable()
+#else
+	#define UNREACHABLE() \
 		do { \
 			std::cerr << "Reached unreachable at line " << __LINE__ << " in File: " << __FILE__ << std::endl; \
 			abort(); \
 		} while(0)
+#endif
 
 void get_hotspots(std::string seq, std::vector<Hotspot> &hotspot_list, SHAPEData &ShapeData, int max_hotspot, vrna_param_t *params);
 int distance(int left, int right);
