@@ -1,6 +1,6 @@
 // Iterative HFold files
 #include "Result.hh"
-#include "W_final.hh"
+#include "pseudo_loop.hh"
 #include "cmdline.hh"
 #include "h_globals.hh"
 #include "hotspot.hh"
@@ -193,8 +193,8 @@ std::vector<RNAEntry> get_all_inputs(const std::string& fileI, const std::string
 }
 
 std::string hfold(std::string seq, std::string res, pf_t &energy, sparse_tree &tree, SHAPEData &ShapeData, bool pk_free, bool pk_only, int dangles) {
-    W_final min_fold(seq, res,ShapeData, pk_free, pk_only, dangles);
-    energy = min_fold.hfold(tree);
+    pseudo_loop min_fold(seq, res,tree,ShapeData, pk_free, pk_only, dangles);
+    energy = min_fold.hfold();
     std::string structure = min_fold.structure;
     return structure;
 }
