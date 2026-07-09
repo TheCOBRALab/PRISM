@@ -511,7 +511,7 @@ void W_final_pf::compute_VP(cand_pos_t i, cand_pos_t j, sparse_tree &tree) {
     pair_type ptype_closingip1jm1 = pair[S_[i + 1]][S_[j - 1]];
     if ((tree.tree[i + 1].pair) < -1 && (tree.tree[j - 1].pair) < -1 && ptype_closingip1jm1 > 0) {
         pf_t vp_stp = (get_e_stP(i, j) * VP.get(i + 1, j - 1));
-        vp_stp *= ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
+        // vp_stp *= ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
         vp_stp *= scale[2];
         contributions += vp_stp;
     }
@@ -1452,7 +1452,7 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
     pair_type ptype_closingip1jm1 = pair[S_[i + 1]][S_[j - 1]];
     if ((tree.tree[i + 1].pair) < -1 && (tree.tree[j - 1].pair) < -1 && ptype_closingip1jm1 > 0) {
         V_temp = (get_e_stP(i, j) * VP.get(i + 1, j - 1));
-        V_temp *= ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
+        // V_temp *= ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
         V_temp *= scale[2];
         qt += V_temp;
         if (qt >= r) {
