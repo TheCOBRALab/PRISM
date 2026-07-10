@@ -421,7 +421,7 @@ void pseudo_loop::Trace_WMBP(cand_pos_t i, cand_pos_t j, energy_t e){
                 if (bp_il >= 0 && bp_il < n && l + TURN <= j) {
                     if (e == get_BE(i,tree->tree[i].pair, bp_il, tree->tree[bp_il].pair) + WI.get(bp_il+1,l-1) + VP.get(l,j) + 2*PB_penalty) {
                         Trace_BE(i,tree->tree[i].pair, bp_il, tree->tree[bp_il].pair,get_BE(i,tree->tree[i].pair, bp_il, tree->tree[bp_il].pair));
-                        Trace_WI(bp_il+1,l-1,WMBW.get(bp_il+1,l-1));
+                        Trace_WI(bp_il+1,l-1,WI.get(bp_il+1,l-1));
                         Trace_VP(l,j,VP.get(l,j));
                         return;
                     }

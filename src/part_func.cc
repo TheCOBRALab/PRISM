@@ -100,6 +100,9 @@ void W_final_pf::rescale_pk_globals() {
     double TT = (exp_params_->model_details.temperature + K0) / (Tmeasure);
     int pf_smooth = exp_params_->model_details.pf_smooth;
     ShapeData->rescale_calculate(kT,TT,pf_smooth);
+    // for(int i = 0; i<30;++i){
+    //     std::cout << i << " " << ShapeData->get_calculated(i) << " " << ShapeData->get_expcalculated(i) << std::endl;
+    // }
 
     expPS_penalty = RESCALE_BF(PS_penalty, PS_penalty * 3, TT, kT);
     expPSM_penalty = RESCALE_BF(PSM_penalty, PSM_penalty * 3, TT, kT);
@@ -196,40 +199,6 @@ pf_t W_final_pf::hfold_pf(sparse_tree &tree) {
 
     pairing_tendency(samples, tree);
     this->frequency = (pf_t)structures[MFE_structure] / num_samples;  
-    // std::cout << std::fixed << std::setprecision(6) << to_PF(MFE_en,n)/W[n] << "\t" << this->frequency << std::endl; 
-    // std::ofstream out("320.txt");
-    // pf_t p = 0;  
-    // for (cand_pos_t i = 1; i <= n; i++){
-    //     for (cand_pos_t j = i + 1; j <= n; j++) {
-    //         std::pair<cand_pos_tu, cand_pos_tu> base_pair(i, j);
-    //         p = (pf_t)samples[base_pair] / num_samples;
-    //         out << std::fixed << std::setprecision(6) << p << std::endl;
-            
-    //     }
-    // }
-    // out.close();
-    // std::ifstream in("100.txt");
-    // p = 0;
-    // pf_t p_100000 = 0;
-    // double rmsd = 0;
-    // std::string str;
-    // int N = 0;  
-    // for (cand_pos_t i = 1; i <= n; i++){
-    //     for (cand_pos_t j = i + 1; j <= n; j++) {
-    //         std::getline(in,str);
-    //         p_100000 = stod(str);
-    //         if(p_100000 == 0.0) continue;
-    //         if(tree.tree[i].pair == j) continue;
-    //         std::pair<cand_pos_tu, cand_pos_tu> base_pair(i, j);
-    //         p = (pf_t)samples[base_pair] / num_samples;
-    //         rmsd+= pow(p-p_100000,2);
-    //         ++N;
-    //     }
-    // }
-    // in.close();
-    // rmsd = rmsd/N;
-    // rmsd = sqrt(rmsd);
-    // std::cout << std::fixed << std::setprecision(6) << rmsd << std::endl;
 
     if (PSplot) {
         create_dot_plot(seq, tree.tree, MFE_structure, samples, num_samples);
@@ -324,7 +293,7 @@ pf_t W_final_pf::compute_internal_restricted(cand_pos_t i, cand_pos_t j, std::ve
                                                       S1_[k - 1], S1_[l + 1], exp_params_);
                     cand_pos_t u1 = k - i - 1;
                     cand_pos_t u2 = j - l - 1;
-                    if(i+1==k && j-1==l) v_iloop_kl*=ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j); // Decide whether shape can be added to internal as well as stack
+                    // if(i+1==k && j-1==l) v_iloop_kl*=ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j); // Decide whether shape can be added to internal as well as stack
                     v_iloop_kl *= scale[u1 + u2 + 2];
                     v_iloop += v_iloop_kl;
                 }
@@ -872,7 +841,7 @@ void W_final_pf::Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure,
                     V_temp = V.get(k,l)
                              * exp_E_IntLoop(u1, u2, ptype_closing, rtype[pair[S_[k]][S_[l]]], S1_[i + 1], S1_[j - 1], S1_[k - 1], S1_[l + 1],
                                              exp_params_);
-                    if(i+1==k && j-1==l) V_temp*=ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
+                    // if(i+1==k && j-1==l) V_temp*=ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
                     V_temp *= scale[u1 + u2 + 2];
                     qbt1 += V_temp;
                     if (qbt1 >= r) break;
