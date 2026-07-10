@@ -293,7 +293,7 @@ pf_t W_final_pf::compute_internal_restricted(cand_pos_t i, cand_pos_t j, std::ve
                                                       S1_[k - 1], S1_[l + 1], exp_params_);
                     cand_pos_t u1 = k - i - 1;
                     cand_pos_t u2 = j - l - 1;
-                    // if(i+1==k && j-1==l) v_iloop_kl*=ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j); // Decide whether shape can be added to internal as well as stack
+                    if(i+1==k && j-1==l) v_iloop_kl*=ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j); // Decide whether shape can be added to internal as well as stack
                     v_iloop_kl *= scale[u1 + u2 + 2];
                     v_iloop += v_iloop_kl;
                 }
@@ -480,7 +480,7 @@ void W_final_pf::compute_VP(cand_pos_t i, cand_pos_t j, sparse_tree &tree) {
     pair_type ptype_closingip1jm1 = pair[S_[i + 1]][S_[j - 1]];
     if ((tree.tree[i + 1].pair) < -1 && (tree.tree[j - 1].pair) < -1 && ptype_closingip1jm1 > 0) {
         pf_t vp_stp = (get_e_stP(i, j) * VP.get(i + 1, j - 1));
-        // vp_stp *= ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
+        vp_stp *= ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
         vp_stp *= scale[2];
         contributions += vp_stp;
     }
@@ -841,7 +841,7 @@ void W_final_pf::Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure,
                     V_temp = V.get(k,l)
                              * exp_E_IntLoop(u1, u2, ptype_closing, rtype[pair[S_[k]][S_[l]]], S1_[i + 1], S1_[j - 1], S1_[k - 1], S1_[l + 1],
                                              exp_params_);
-                    // if(i+1==k && j-1==l) V_temp*=ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
+                    if(i+1==k && j-1==l) V_temp*=ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
                     V_temp *= scale[u1 + u2 + 2];
                     qbt1 += V_temp;
                     if (qbt1 >= r) break;
@@ -1421,7 +1421,7 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
     pair_type ptype_closingip1jm1 = pair[S_[i + 1]][S_[j - 1]];
     if ((tree.tree[i + 1].pair) < -1 && (tree.tree[j - 1].pair) < -1 && ptype_closingip1jm1 > 0) {
         V_temp = (get_e_stP(i, j) * VP.get(i + 1, j - 1));
-        // V_temp *= ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
+        V_temp *= ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
         V_temp *= scale[2];
         qt += V_temp;
         if (qt >= r) {
