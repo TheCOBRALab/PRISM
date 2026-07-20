@@ -572,8 +572,7 @@ void pseudo_loop::Trace_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t
     this->structure[i] = '(';
     this->structure[j] = ')';
     if(i==ip && j==jp) return; // This should ensure that the symbols are at every position
-
-    if (tree->tree[i+1].pair == j-1 && e == get_e_stP(i,j) + get_BE(i+1,j-1,ip,jp)) {
+    if (tree->tree[i+1].pair == j-1 && e == (energy_t) (get_e_stP(i,j) + get_BE(i+1,j-1,ip,jp) + ShapeData->get_calculated(i) + ShapeData->get_calculated(j))) {
         Trace_BE(i+1,j-1,ip,jp,get_BE(i+1,j-1,ip,jp));
         return;
     }

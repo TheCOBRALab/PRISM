@@ -672,13 +672,13 @@ void W_final_pf::compute_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_
 
     // base case:
     if (i == ip && j == jp && i < j) {
-
         BE.set(i,ip) = scale[2];
         return;
     }
 
     if (tree.tree[i + 1].pair == j - 1) {
         pf_t be_estp = get_e_stP(i, j) * get_BE(i + 1, j - 1, ip, jp, tree);
+        be_estp *= ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
         be_estp *= scale[2];
         contributions += be_estp;
     }

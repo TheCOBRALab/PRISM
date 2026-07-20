@@ -569,7 +569,7 @@ void pseudo_loop::compute_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos
     energy_t m1 = INF, m2 = INF, m3 = INF, m4 = INF, m5 = INF;
     // 1) bp(i+1) == j-1
     if (tree->tree[i + 1].pair == j - 1) {
-        m1 = get_e_stP(i, j) + get_BE(i + 1, j - 1, ip, jp);
+        m1 = get_e_stP(i, j) + get_BE(i + 1, j - 1, ip, jp) + ShapeData->get_calculated(i) + ShapeData->get_calculated(j);
     }
 
     // cases 2-5 are all need an l s.t. i<l<=ip and jp<=bp(l)<j
