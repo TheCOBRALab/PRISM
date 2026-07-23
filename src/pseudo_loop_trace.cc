@@ -115,7 +115,8 @@ void pseudo_loop::Trace_V(cand_pos_t i, cand_pos_t j, energy_t e){
 					}
 					return;
 				}
-				tmp = static_cast<energy_t>((k-i-1)*params_->MLbase + WMp.get(k,j-1))+ E_MLstem(pair[S_[j]][S_[i]],-1,-1,params_) + params_->MLclosing;
+				tmp = static_cast<energy_t>((k-i-1)*params_->MLbase + WMp.get(k,j-1)) + params_->MLclosing;
+                tmp += (params_->model_details.dangles == 2 ? E_MLstem(pair[S_[j]][S_[i]],S_[j-1],S_[i+1],params_) : E_MLstem(pair[S_[j]][S_[i]],-1,-1,params_));
 				if (e==tmp){
 					Trace_WMp(k,j-1,WMp.get(k,j-1));
 					return;
@@ -256,7 +257,7 @@ void pseudo_loop::Trace_WMp(cand_pos_t i, cand_pos_t j, energy_t e){
 	if (debug) printf("WMp at %d and %d with %d\n", i, j, e);
 	energy_t tmp = WMB.get(i,j) + PSM_penalty + b_penalty;
 	if(e==tmp){
-		Trace_WMB(i,j,WMp.get(i,j));
+		Trace_WMB(i,j,WMB.get(i,j));
 		return;
 	}
 	tmp = WMp.get(i,j-1) + params_->MLbase;
@@ -350,19 +351,20 @@ void pseudo_loop::Trace_WMB(cand_pos_t i, cand_pos_t j, energy_t e){
         return;
     }
     if (tree->tree[j].pair >= 0 && j > tree->tree[j].pair && tree->tree[j].pair > i) {
-            cand_pos_t bp_j = tree->tree[j].pair;
-            for (cand_pos_t l = bp_j + 1; l < j; l++) {
-                cand_pos_t Bp_lj = tree->Bp(l, j);
-                if (Bp_lj >= 0 && Bp_lj < n) {
-                    if (e == get_BE(bp_j,j,tree->tree[Bp_lj].pair,Bp_lj) + WMBP.get(i,l) + WI.get(l+1,Bp_lj-1) + PB_penalty) {
-                        Trace_BE(bp_j,j,tree->tree[Bp_lj].pair, Bp_lj,BE.get(bp_j,tree->tree[Bp_lj].pair));
-                        Trace_WMBP(i,l,WMBP.get(i,l));
-                        Trace_WI(l+1,Bp_lj-1,WI.get(l+1,Bp_lj-1));
-                        return;   
-                    }
+        cand_pos_t bp_j = tree->tree[j].pair;
+        for (cand_pos_t l = bp_j + 1; l < j; l++) {
+            cand_pos_t Bp_lj = tree->Bp(l, j);
+            if (Bp_lj >= 0 && Bp_lj < n) {
+                if (e == get_BE(bp_j,j,tree->tree[Bp_lj].pair,Bp_lj) + WMBP.get(i,l) + WI.get(l+1,Bp_lj-1) + PB_penalty) {
+                    Trace_BE(bp_j,j,tree->tree[Bp_lj].pair, Bp_lj,BE.get(bp_j,tree->tree[Bp_lj].pair));
+                    Trace_WMBP(i,l,WMBP.get(i,l));
+                    Trace_WI(l+1,Bp_lj-1,WI.get(l+1,Bp_lj-1));
+                    return;   
                 }
             }
         }
+    }
+    if(i==391 && j==444) printf("i is %d and j is %d and e is %d and WMBP is %d\n",i,j,e,WMBP.get(i,j));
     UNREACHABLE();
 }
 void pseudo_loop::Trace_WMBP(cand_pos_t i, cand_pos_t j, energy_t e){
