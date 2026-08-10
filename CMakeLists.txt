@@ -7,15 +7,53 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Directory for parameters
 set(PARAMS_DIR "${CMAKE_SOURCE_DIR}/params")  # or CMAKE_INSTALL_PREFIX based path
 
+# Default build type if none is specified
 if(NOT CMAKE_BUILD_TYPE)
-  set(CMAKE_BUILD_TYPE Release)
+    set(CMAKE_BUILD_TYPE Release)
 endif()
 
-set(CMAKE_CXX_FLAGS "-Wall -Wextra")
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
-set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+# -------------------------------------------------------------------
+#                             C++ Flags
+# -------------------------------------------------------------------
 
-SET(SOURCE
+# Debug configuration
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" OR CMAKE_BUILD_TYPE STREQUAL "Strict")
+    message(STATUS "Building in Debug mode")
+    add_compile_options(
+        -g
+        -O0
+        -Wall
+        -Wextra
+        # -Wpedantic
+        # -Wshadow
+        # -Wsign-compare
+        # -Wconversion
+        # -Wsign-conversion
+        -fsanitize=address,undefined
+        -fno-sanitize-recover=all
+        -fno-omit-frame-pointer
+    )
+
+    if(CMAKE_BUILD_TYPE STREQUAL "Strict")
+        add_compile_options(-Werror)
+    endif()
+
+    add_link_options(
+        -fsanitize=address,undefined
+        -fno-sanitize-recover=all
+    )
+else()
+    # Normal (Release or other non-Debug builds)
+    message(STATUS "Building in Release/Normal mode")
+    add_compile_options(
+        -O3
+        -march=native
+        -Wall
+        -Wextra
+    )
+endif()
+
+set(SOURCE
   src/pseudo_loop_trace.cc
   src/pseudo_loop.cc 
   src/part_func.cc
@@ -40,7 +78,6 @@ set(vienna_SOURCE
 )
 
 add_library(RNA STATIC ${vienna_SOURCE})
-# configure_file(RNA.pc.in RNA.pc @ONLY)
 
 target_include_directories(RNA PRIVATE .)
 
