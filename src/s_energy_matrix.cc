@@ -44,7 +44,7 @@ s_energy_matrix::s_energy_matrix(std::string seq, cand_pos_t length,  SHAPEData 
     // an vector with indexes, such that we don't work with a 2D array, but with a 1D array of length (n*(n+1))/2
     index.resize(n + 1);
     cand_pos_t total_length = ((n + 1) * (n + 2)) / 2;
-    TriangleMatrixPF::new_index(index,n+1);
+    TriangleMatrix::new_index(index,n+1);
     // this array holds V(i,j), and what (i,j) encloses: hairpin loop, stack pair, internal loop or multi-loop
     nodes.resize(total_length);
 }
