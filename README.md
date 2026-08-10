@@ -90,6 +90,7 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
   -d  --dangles          Specify the dangle model to be used (base is 2)
   -P, --paramFile        Read energy parameters from paramfile, instead of using the default parameter set.\n
   -s, --samples          Give the number of samples foe the stochastic backtracking (default 1000)
+  -S, --shape            Give a path to a shape file corresponding to the sequence given
       --noConv           Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA
       --noPS             Don't create a Postscript drawing of the base pair probabilities
 
