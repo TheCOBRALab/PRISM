@@ -1,71 +1,82 @@
 # PRISM
 
 #### Description:
-Software implementation of PRISM.     
+
+Software implementation of PRISM.  
 PRISM is an algorithm for computing the conditional partition function for density-2 RNA pseudoknots.
 
-#### Cite: 
+#### Cite:
+
 Mateo Gray, Luke Trinity, Ulrike Stege, Yann Ponty, Sebastian Will, Hosna Jabbari, CParty: hierarchically constrained partition function of RNA pseudoknots, Bioinformatics, Volume 41, Issue 1, January 2025, btae748, https://doi.org/10.1093/bioinformatics/btae748
 
-#### Supported OS: 
-Linux 
-macOS 
+#### Supported OS:
 
-### Installation:  
-Requirements: A compiler that supports C++11 standard (tested with g++ version 4.7.2 or higher)  and CMake version 3.1 or greater.    
+Linux
+macOS
 
-[CMake](https://cmake.org/install/) version 3.1 or greater must be installed in a way that HFold can find it.    
-To test if your Mac or Linux system already has CMake, you can type into a terminal:      
+### Installation:
+
+Requirements: A compiler that supports C++11 standard (tested with g++ version 4.7.2 or higher) and CMake version 3.15 or greater.
+
+[CMake](https://cmake.org/install/) version 3.15 or greater must be installed in a way that HFold can find it.  
+To test if your Mac or Linux system already has CMake, you can type into a terminal:
+
 ```
 cmake --version
 ```
+
 If it does not print a cmake version greater than or equal to 3.1, you will have to install CMake depending on your operating system.
 
-#### Mac:    
-Easiest way is to install homebrew and use that to install CMake.    
-To do so, run the following from a terminal to install homebrew:      
-```  
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"   
-```    
-When that finishes, run the following from a terminal to install CMake.     
-```   
-brew install cmake   
-``` 
-#### Linux:    
-Run from a terminal     
-```
-wget http://www.cmake.org/files/v3.8/cmake-3.8.2.tar.gz
-tar xzf cmake-3.8.2.tar.gz
-cd cmake-3.8.2
-./configure
-make
-make install
-```
-[Linux instructions source](https://geeksww.com/tutorials/operating_systems/linux/installation/downloading_compiling_and_installing_cmake_on_linux.php)
+#### Mac:
 
-#### Steps for installation   
+Easiest way is to install homebrew and use that to install CMake.  
+To do so, run the following from a terminal to install homebrew:
+
+```
+/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+```
+
+When that finishes, run the following from a terminal to install CMake.
+
+```
+brew install cmake
+```
+
+#### Linux:
+
+Run from a terminal
+
+```
+sudo apt update
+sudo apt install cmake
+```
+
+#### Steps for installation
+
 1. [Download the repository](https://github.com/HosnaJabbari/HFold.git) and extract the files onto your system.
 2. From a command line in the root directory (where this README.md is) run
+
 ```
-cmake -H. -Bbuild
-cmake --build build
-```   
-If you need to specify a specific compiler, such as g++, you can instead run something like   
+cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
+cmake --build build --parallel
 ```
-cmake -H. -Bbuild -DCMAKE_CXX_COMPILER=g++
-cmake --build build
-```   
+
+If you need to specify a specific compiler, such as g++, you can instead run something like
+
+```
+cmake -S . -B build -DCMAKE_CXX_COMPILER=g++
+cmake --build build --parallel
+```
+
 This can be useful if you are getting errors about your compiler not having C++17 features.
 
-Help
-========================================
+# Help
 
 ```
 Usage: PRISM[options] [input sequence]
 ```
 
 Read input file from cmdline; predict minimum free energy, ensemble energy, optimum structure, and BPP structure using the RNA folding algorithm.
-
 
 ```
   -h, --help             Print help and exit
@@ -81,9 +92,8 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
   -s, --samples          Give the number of samples foe the stochastic backtracking (default 1000)
       --noConv           Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA
       --noPS             Don't create a Postscript drawing of the base pair probabilities
-  
-```
 
+```
 
 #### How to use:
 
@@ -97,7 +107,7 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
         If no input structure is given, or suboptimal structures are greater than the number given, PRISM generates hotspots to be used as input structures -- where hotspots are energetically favorable stems
         The default parameter file is DP09. This can be changed via -P and specifying the parameter file you would like
         A Postscript file will be generated automatically showing the base pairing probabilities. This can be turned off with --noPS
-    
+
     Sequence requirements:
         containing only characters GCAU
 
@@ -121,6 +131,7 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
             (............................)
 
 #### Output Information
+
     Output text format:
         Line1: Sequence
         Line2: MFE structure (MFE energy)
@@ -132,7 +143,7 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
 
     Remarks:
         The BPP structure gives an output structure based on the probabilitiy of that base pair
-        occuring across the sampled structures. For pseudoknot-free base pairs, 
+        occuring across the sampled structures. For pseudoknot-free base pairs,
         {} indicates .334<p<=.667 and () indicate p>.667.
         For pseudoknotted base pairs /\ indicates .334<p<=.667 and [] indicate p>.667.
 
@@ -141,6 +152,7 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
         bottom left while the probability structure is in the top right.
 
 #### Example:
+
     Assume you are in the PRISM directory
     ./build/PRISM -i "/home/username/Desktop/myinputfile.txt"
     ./build/PRISM -i "/home/username/Desktop/myinputfile.txt" --o "outputfile.txt"
@@ -152,11 +164,10 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
     ./build/PRISM -P "params/rna_Turner04.par" -r "(............................)" GCAACGAUGACAUACAUCGCUAGUCGACGC
     ./build/PRISM -s 10000 --noPS -r "(............................)" GCAACGAUGACAUACAUCGCUAGUCGACGC
 
-
-
 ### SARS-CoV-2 Example
+
     ./build/PRISM -r "..(((((((((((..........)))))))))))....................................." UUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCU
 
-    
 ## Questions
+
 For questions, you can email mateo2@ualberta.ca
