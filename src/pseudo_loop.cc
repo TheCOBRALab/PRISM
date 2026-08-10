@@ -23,7 +23,7 @@ void pseudo_loop::allocate_space() {
 
     structure = std::string(n+1, '.');
     index.resize(n + 1);
-    TriangleMatrixPF::new_index(index,n+1);
+    TriangleMatrix::new_index(index,n+1);
     cand_pos_t total_length = ((n + 1) * (n + 2)) / 2;
     W.resize(n+1,0);
     WM.init(n+1,index);
