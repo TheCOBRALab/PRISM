@@ -169,6 +169,9 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
 
     ./build/PRISM -r "..(((((((((((..........)))))))))))....................................." UUUGCGGUGUAAGUGCAGCCCGUCUUACACCGUGCGGCACAGGCACUAGUACUGAUGUCGUAUACAGGGCU
 
+## Results
+Results can be found at https://github.com/mateog4712/PRISM-RawData
+
 ## Questions
 
 For questions, you can email mateo2@ualberta.ca
