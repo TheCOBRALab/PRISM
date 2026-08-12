@@ -730,8 +730,8 @@ energy_t pseudo_loop::E_MbLoop(const energy_t WM2ij, const energy_t WM2ip1j, con
     base_type si1 = S_[i+1];
     base_type sj1 = S_[j-1];
 
-	auto consider = [&](energy_t v, bool check, base_type s5, base_type s3, int ml_count) {
-        if (check && v == INF) return;
+	auto consider = [&](energy_t v, bool valid, base_type s5, base_type s3, int ml_count) {
+        if (!valid || v == INF) return;
         e = std::min(e, v + E_MLstem(tt, s5, s3, params_) + params_->MLclosing + ml_count * params_->MLbase);
     };
 
@@ -789,14 +789,9 @@ void expand_hotspot(s_energy_matrix *V, Hotspot &hotspot, int n) {
 
     double energy = V->get_energy(hotspot.get_left_outer_index(), hotspot.get_right_outer_index());
 
-    // printf("here and %d\n",energy);
-    // printf("energy: %lf, AU_total: %d, dangle_top_total: %d, dangle_bot_total: %d\n",energy,non_gc_penalty,dangle_top_penalty,dangle_bot_penalty);
-
     energy = (energy + dangle_penalty) / 100;
 
     hotspot.set_energy(energy);
-    // printf("done: %d %d %d
-    // %d\n",hotspot->get_left_outer_index(),hotspot->get_left_inner_index(),hotspot->get_right_inner_index(),hotspot->get_right_outer_index());
     return;
 }
 
