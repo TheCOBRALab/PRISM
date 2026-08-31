@@ -37,7 +37,7 @@ SHAPEData::SHAPEData(const std::string &filename, cand_pos_t n, double slope, do
     cand_pos_t i = 0;
     while (nextToken(tok) && i < n) {
         ++i;
-        if (tok == "NULL") continue;
+        if (tok == "NULL" || tok == "NaN") continue;
         double reactivity = std::stod(tok);
         calculated[i] = 100.0*calculate(reactivity);
         expcalculated[i] = calculated[i];

@@ -73,6 +73,52 @@ inline void trim(std::string& s) {
     s.erase(s.find_last_not_of(" \t\n\r\f\v\"") + 1);
 }
 
+inline std::string fixShapebrackets(std::string &old_shape){
+    std::string shape = old_shape;
+    int n = shape.length();
+
+    std::vector<std::pair<int,int>> parenPairs, squarePairs;
+    std::vector<int> st;
+    
+    for(int j =1;j<n;++j){
+        if(shape[j] == ']' && shape[j-1] == '['){
+            shape[j] = ')';
+            shape[j-1] = '(';
+        }
+    }
+    for (int j = 0; j < n; ++j) {
+        if (shape[j] == '(') st.push_back(j);
+        else if (shape[j] == ')') {
+            parenPairs.push_back({st.back(), j});
+            st.pop_back();
+        }
+    }
+    for (int j = 0; j < n; ++j) {
+        if (shape[j] == '[') st.push_back(j);
+        else if (shape[j] == ']') {
+            squarePairs.push_back({st.back(), j});
+            st.pop_back();
+        }
+    }
+
+    auto crosses = [](int i, int j, int a, int b) {
+        return (a < i && i < b && b < j) || (i < a && a < j && j < b);
+    };
+
+    for (auto& sp : squarePairs) {
+        int i = sp.first, j = sp.second;
+        bool isPK = false;
+        for (auto& pp : parenPairs) {
+            if (crosses(i, j, pp.first, pp.second)) { isPK = true; break; }
+        }
+        if (!isPK) {
+            shape[i] = '(';
+            shape[j] = ')';
+        }
+    }
+    return shape;
+}
+
 /**
  * @brief Represents an RNA entry with name, sequence, and structure.
  *
@@ -237,7 +283,7 @@ void print_results(std::vector<Result> &result_list, std::vector<std::vector<std
             out << "Result_" << i << ":     " << result_list[i].get_centroid_structure() << " (" << result_list[i].get_distance() << ")" << std::endl;
             out << "Result_" << i << ":     ";
             for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
-               out << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
+               out << fixShapebrackets(fatgraphs[fatgraph_num][j].first) << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
             }
             out << std::endl;
             out << "frequency of MFE structure in ensemble: " << result_list[i].get_frequency() << "; ensemble diversity " << result_list[i].get_diversity() << std::endl;
@@ -256,7 +302,7 @@ void print_results(std::vector<Result> &result_list, std::vector<std::vector<std
             std::cout << result_list[0].get_MEA_structure() << " (" << result_list[0].get_MEA() << ")" << std::endl;
             std::cout << result_list[0].get_centroid_structure() << " (" << result_list[0].get_distance() << ")" << std::endl;
             for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
-               std::cout << std::fixed << std::setprecision(4) << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
+               std::cout << std::fixed << std::setprecision(4) << fixShapebrackets(fatgraphs[fatgraph_num][j].first) << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
             }
             std::cout << std::endl;
             std::cout << "frequency of MFE structure in ensemble: " << result_list[0].get_frequency() << "; ensemble diversity " << result_list[0].get_diversity() << std::endl;
@@ -276,7 +322,7 @@ void print_results(std::vector<Result> &result_list, std::vector<std::vector<std
                           << std::endl;
                 std::cout << "Result_" << i << ":     ";
                 for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
-                    std::cout << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
+                    std::cout << fixShapebrackets(fatgraphs[fatgraph_num][j].first) << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
                 }
                 std::cout << std::endl;
                 std::cout << "frequency of MFE structure in ensemble: " << result_list[i].get_frequency() << "; ensemble diversity " << result_list[i].get_diversity() << std::endl;
