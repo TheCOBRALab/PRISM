@@ -73,52 +73,6 @@ inline void trim(std::string& s) {
     s.erase(s.find_last_not_of(" \t\n\r\f\v\"") + 1);
 }
 
-inline std::string fixShapebrackets(std::string &old_shape){
-    std::string shape = old_shape;
-    int n = shape.length();
-
-    std::vector<std::pair<int,int>> parenPairs, squarePairs;
-    std::vector<int> st;
-    
-    for(int j =1;j<n;++j){
-        if(shape[j] == ']' && shape[j-1] == '['){
-            shape[j] = ')';
-            shape[j-1] = '(';
-        }
-    }
-    for (int j = 0; j < n; ++j) {
-        if (shape[j] == '(') st.push_back(j);
-        else if (shape[j] == ')') {
-            parenPairs.push_back({st.back(), j});
-            st.pop_back();
-        }
-    }
-    for (int j = 0; j < n; ++j) {
-        if (shape[j] == '[') st.push_back(j);
-        else if (shape[j] == ']') {
-            squarePairs.push_back({st.back(), j});
-            st.pop_back();
-        }
-    }
-
-    auto crosses = [](int i, int j, int a, int b) {
-        return (a < i && i < b && b < j) || (i < a && a < j && j < b);
-    };
-
-    for (auto& sp : squarePairs) {
-        int i = sp.first, j = sp.second;
-        bool isPK = false;
-        for (auto& pp : parenPairs) {
-            if (crosses(i, j, pp.first, pp.second)) { isPK = true; break; }
-        }
-        if (!isPK) {
-            shape[i] = '(';
-            shape[j] = ')';
-        }
-    }
-    return shape;
-}
-
 /**
  * @brief Represents an RNA entry with name, sequence, and structure.
  *
@@ -245,9 +199,9 @@ std::string hfold(std::string seq, std::string res, pf_t &energy, sparse_tree &t
     return structure;
 }
 
-std::string hfold_pf(std::string &seq, std::string &final_structure, pf_t &energy, std::string &MEA_structure, pf_t &MEA, std::string &centroid_structure, std::vector<std::pair<std::string,double>> &fatgraphs,pf_t &distance, pf_t &frequency, pf_t &diversity, int &num_fatgraphs, sparse_tree &tree, SHAPEData &ShapeData, bool pk_free,bool pk_only, int dangles, double min_en,
+std::string hfold_pf(std::string &seq, std::string &final_structure, pf_t &energy, std::string &MEA_structure, pf_t &MEA, std::string &centroid_structure, std::vector<std::pair<std::string,double>> &fatgraphs,pf_t &distance, pf_t &frequency, pf_t &diversity, int &num_fatgraphs, sparse_tree &tree, SHAPEData &ShapeData, bool pk_free,bool pk_only, bool level6, int dangles, double min_en,
                      int num_samples, bool print_samples, bool PSplot, double gamma) {
-    W_final_pf min_fold(seq, final_structure,ShapeData, pk_free,pk_only, dangles, min_en, num_samples,print_samples, PSplot, gamma);
+    W_final_pf min_fold(seq, final_structure,ShapeData, pk_free,pk_only,level6, dangles, min_en, num_samples,print_samples, PSplot, gamma);
     energy = min_fold.hfold_pf(tree);
     std::string structure = min_fold.structure;
     MEA = min_fold.hfold_MEA(tree);
@@ -283,7 +237,7 @@ void print_results(std::vector<Result> &result_list, std::vector<std::vector<std
             out << "Result_" << i << ":     " << result_list[i].get_centroid_structure() << " (" << result_list[i].get_distance() << ")" << std::endl;
             out << "Result_" << i << ":     ";
             for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
-               out << fixShapebrackets(fatgraphs[fatgraph_num][j].first) << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
+               out << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
             }
             out << std::endl;
             out << "frequency of MFE structure in ensemble: " << result_list[i].get_frequency() << "; ensemble diversity " << result_list[i].get_diversity() << std::endl;
@@ -302,7 +256,7 @@ void print_results(std::vector<Result> &result_list, std::vector<std::vector<std
             std::cout << result_list[0].get_MEA_structure() << " (" << result_list[0].get_MEA() << ")" << std::endl;
             std::cout << result_list[0].get_centroid_structure() << " (" << result_list[0].get_distance() << ")" << std::endl;
             for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
-               std::cout << std::fixed << std::setprecision(4) << fixShapebrackets(fatgraphs[fatgraph_num][j].first) << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
+               std::cout << std::fixed << std::setprecision(4) << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
             }
             std::cout << std::endl;
             std::cout << "frequency of MFE structure in ensemble: " << result_list[0].get_frequency() << "; ensemble diversity " << result_list[0].get_diversity() << std::endl;
@@ -322,7 +276,7 @@ void print_results(std::vector<Result> &result_list, std::vector<std::vector<std
                           << std::endl;
                 std::cout << "Result_" << i << ":     ";
                 for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
-                    std::cout << fixShapebrackets(fatgraphs[fatgraph_num][j].first) << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
+                    std::cout << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
                 }
                 std::cout << std::endl;
                 std::cout << "frequency of MFE structure in ensemble: " << result_list[i].get_frequency() << "; ensemble diversity " << result_list[i].get_diversity() << std::endl;
@@ -356,19 +310,21 @@ int main(int argc, char *argv[]) {
 
     int number_of_suboptimal_structure = args_info.subopt_given ? args_info.subopt_arg : 1;
 
-    bool pk_free = args_info.pk_free_given;
-    bool pk_only = args_info.pk_only_given;
+    bool pk_free = args_info.pk_free_flag;
+    bool pk_only = args_info.pk_only_flag;
     std::string shapeFile = args_info.shape_given ? args_info.shape_arg : "";
 
     int dangles = args_info.dangles_given ? args_info.dangles_arg : 2;
 
     int num_samples = args_info.samples_given ? args_info.samples_arg : 1000;
 
-    bool print_samples = args_info.print_samples_given;
+    bool print_samples = args_info.print_samples_flag;
 
     double gamma = args_info.gamma_given ? args_info.gamma_arg : 1;
 
-    bool PSplot = !args_info.noPS_given;
+    bool level6 = args_info.level_flag;
+
+    bool PSplot = !args_info.noPS_flag;
 
     int num_fatgraph = args_info.fatgraph_given ? args_info.fatgraph_arg : 1;
 
@@ -428,7 +384,7 @@ int main(int argc, char *argv[]) {
             std::string structure = hotspot_list[i].get_structure();
             sparse_tree tree(structure, n);
             std::string final_structure = hfold(current.sequence, structure, energy, tree,ShapeData, pk_free, pk_only, dangles);
-            std::string final_structure_pf = hfold_pf(current.sequence, final_structure, energy_pf,MEA_structure,MEA,centroid_structure,fatgraphs[i],distance,frequency, diversity,num_fatgraph, tree,ShapeData, pk_free,pk_only, dangles, energy, num_samples, print_samples, PSplot, gamma);
+            std::string final_structure_pf = hfold_pf(current.sequence, final_structure, energy_pf,MEA_structure,MEA,centroid_structure,fatgraphs[i],distance,frequency, diversity,num_fatgraph, tree,ShapeData, pk_free,pk_only,level6, dangles, energy, num_samples, print_samples, PSplot, gamma);
             if (!args_info.input_structure_given && energy > 0.0) {
                 energy = 0.0;
                 energy_pf = 0.0;

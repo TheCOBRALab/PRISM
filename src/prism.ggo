@@ -62,6 +62,10 @@ option "fatgraph" f
     "Give the number of fatgraphs outputted, along with their frequencies (default 1)"
     int default="1" optional
 
+option "level" L
+    "Change the RNA shape to level 6 (Default is 5)"
+    flag off
+
 option "noConv" -
     "Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA"
     flag off

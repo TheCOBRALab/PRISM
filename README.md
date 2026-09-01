@@ -91,6 +91,7 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
   -P, --paramFile        Read energy parameters from paramfile, instead of using the default parameter set.\n
   -s, --samples          Give the number of samples foe the stochastic backtracking (default 1000)
   -S, --shape            Give a path to a shape file corresponding to the sequence given
+  -L, --level            Change the RNA shape to level 6 (Default is 5)
       --noConv           Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA
       --noPS             Don't create a Postscript drawing of the base pair probabilities
 
@@ -108,9 +109,10 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
         If no input structure is given, or suboptimal structures are greater than the number given, PRISM generates hotspots to be used as input structures -- where hotspots are energetically favorable stems
         The default parameter file is DP09. This can be changed via -P and specifying the parameter file you would like
         A Postscript file will be generated automatically showing the base pairing probabilities. This can be turned off with --noPS
+        RNA shape level 6 keeps only the portion of the shape which forms a pseudoknot. For a pseudoknot-free shape, this will therefore be a empty string
 
     Sequence requirements:
-        containing only characters GCAU
+        containing only characters GCAUT
 
     Structure requirements:
         -pseudoknot free

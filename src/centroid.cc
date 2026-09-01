@@ -225,6 +225,63 @@ std::string canonicalize_fatgraph(const std::string &fatgraph){
     return canonicalized;
 }
 
+inline void fixShapebrackets(std::string &shape){
+    cand_pos_t n = shape.length();
+
+    std::vector<std::pair<cand_pos_t,cand_pos_t>> parenPairs, squarePairs;
+    std::vector<cand_pos_t> st;
+    
+    for(cand_pos_t j =1;j<n;++j){
+        if(shape[j] == ']' && shape[j-1] == '['){
+            shape[j] = ')';
+            shape[j-1] = '(';
+        }
+    }
+    for (cand_pos_t j = 0; j < n; ++j) {
+        if (shape[j] == '(') st.push_back(j);
+        else if (shape[j] == ')') {
+            parenPairs.push_back({st.back(), j});
+            st.pop_back();
+        }
+    }
+    for (cand_pos_t j = 0; j < n; ++j) {
+        if (shape[j] == '[') st.push_back(j);
+        else if (shape[j] == ']') {
+            squarePairs.push_back({st.back(), j});
+            st.pop_back();
+        }
+    }
+
+    auto crosses = [](int i, int j, int a, int b) {
+        return (a < i && i < b && b < j) || (i < a && a < j && j < b);
+    };
+
+    for (auto& sp : squarePairs) {
+        int i = sp.first, j = sp.second;
+        bool isPK = false;
+        for (auto& pp : parenPairs) {
+            if (crosses(i, j, pp.first, pp.second)) { isPK = true; break; }
+        }
+        if (!isPK) {
+            shape[i] = '(';
+            shape[j] = ')';
+        }
+    }
+}
+
+inline std::string changeToLevel6Shape(std::string &old_shape){
+    cand_pos_t n = old_shape.length();
+    std::string shape = old_shape;
+     std::vector<std::pair<int,int>> parenPairs, squarePairs;
+     for(cand_pos_t j = n-2;j>=0;--j){
+        if(shape[j] == '(' && shape[j+1] == ')'){
+            shape.erase(j+1,1); // order of erasure matters here
+            shape.erase(j,1);
+        }
+    }
+    return shape;
+}
+
 std::string W_final_pf::get_fatgraph(std::string structure){
     const cand_pos_t n = structure.length();
     std::vector<int> fres(n,-2);
@@ -233,5 +290,9 @@ std::string W_final_pf::get_fatgraph(std::string structure){
 
     std::string fatgraph = generate_fatgraph(structure,fres,up,n);
     fatgraph = canonicalize_fatgraph(fatgraph);
+    fixShapebrackets(fatgraph);
+    if(level6){
+        return changeToLevel6Shape(fatgraph);
+    }
     return fatgraph;
 }

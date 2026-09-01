@@ -12,13 +12,14 @@
 
 #define debug 0
 
-W_final_pf::W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &ShapeData, bool pk_free,bool pk_only, int dangle, double energy, int num_samples, bool print_samples, bool PSplot, double gamma)
+W_final_pf::W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &ShapeData, bool pk_free,bool pk_only, bool level6, int dangle, double energy, int num_samples, bool print_samples, bool PSplot, double gamma)
     : exp_params_(vrna_exp_params(NULL)) {
     this->seq = seq;
     this->MFE_structure = MFE_structure;
     this->n = seq.length();
     this->pk_free = pk_free;
     this->pk_only = pk_only;
+    this->level6 = level6;
     this->PSplot = PSplot;
     this->num_samples = num_samples;
     this->print_samples = print_samples;
