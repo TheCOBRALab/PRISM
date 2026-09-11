@@ -292,7 +292,12 @@ std::string W_final_pf::get_fatgraph(std::string structure){
     fatgraph = canonicalize_fatgraph(fatgraph);
     fixShapebrackets(fatgraph);
     if(level6){
-        return changeToLevel6Shape(fatgraph);
+        std::string levelsix = changeToLevel6Shape(fatgraph);
+        fres.resize(levelsix.length(),-2);
+        up.resize(levelsix.length(),0);
+        generate_pt(levelsix,fres,up,levelsix.length());
+        return generate_fatgraph(levelsix,fres,up,levelsix.length());;
+
     }
     return fatgraph;
 }
