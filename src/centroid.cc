@@ -282,7 +282,7 @@ inline std::string changeToLevel6Shape(std::string &old_shape){
     return shape;
 }
 
-std::string W_final_pf::get_fatgraph(std::string structure){
+std::pair<std::string,std::string> W_final_pf::get_fatgraph(std::string structure){
     const cand_pos_t n = structure.length();
     std::vector<int> fres(n,-2);
     std::vector<int> up(n,0);
@@ -291,13 +291,10 @@ std::string W_final_pf::get_fatgraph(std::string structure){
     std::string fatgraph = generate_fatgraph(structure,fres,up,n);
     fatgraph = canonicalize_fatgraph(fatgraph);
     fixShapebrackets(fatgraph);
-    if(level6){
-        std::string levelsix = changeToLevel6Shape(fatgraph);
-        fres.resize(levelsix.length(),-2);
-        up.resize(levelsix.length(),0);
-        generate_pt(levelsix,fres,up,levelsix.length());
-        return generate_fatgraph(levelsix,fres,up,levelsix.length());;
-
-    }
-    return fatgraph;
+    std::string levelsix = changeToLevel6Shape(fatgraph);
+    fres.resize(levelsix.length(),-2);
+    up.resize(levelsix.length(),0);
+    generate_pt(levelsix,fres,up,levelsix.length());
+    std::string fatgraphSix = generate_fatgraph(levelsix,fres,up,levelsix.length());
+    return std::pair<std::string,std::string> {fatgraph,fatgraphSix};
 }

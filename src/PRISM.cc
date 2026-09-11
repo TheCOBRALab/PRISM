@@ -199,16 +199,16 @@ std::string hfold(std::string seq, std::string res, pf_t &energy, sparse_tree &t
     return structure;
 }
 
-std::string hfold_pf(std::string &seq, std::string &final_structure, pf_t &energy, std::string &MEA_structure, pf_t &MEA, std::string &centroid_structure, std::vector<std::pair<std::string,double>> &fatgraphs,pf_t &distance, pf_t &frequency, pf_t &diversity, int &num_fatgraphs, sparse_tree &tree, SHAPEData &ShapeData, bool pk_free,bool pk_only, bool level6, int dangles, double min_en,
+std::string hfold_pf(std::string &seq, std::string &final_structure, pf_t &energy, std::string &MEA_structure, pf_t &MEA, std::string &centroid_structure, std::vector<std::pair<std::string,double>> &fatgraphs,std::vector<std::pair<std::string,double>> &fatgraphsSix,pf_t &distance, pf_t &frequency, pf_t &diversity, int &num_fatgraphs, sparse_tree &tree, SHAPEData &ShapeData, bool pk_free,bool pk_only, int dangles, double min_en,
                      int num_samples, bool print_samples, bool PSplot, double gamma) {
-    W_final_pf min_fold(seq, final_structure,ShapeData, pk_free,pk_only,level6, dangles, min_en, num_samples,print_samples, PSplot, gamma);
+    W_final_pf min_fold(seq, final_structure,ShapeData, pk_free,pk_only, dangles, min_en, num_samples,print_samples, PSplot, gamma);
     energy = min_fold.hfold_pf(tree);
     std::string structure = min_fold.structure;
     MEA = min_fold.hfold_MEA(tree);
     MEA_structure = min_fold.MEA_structure;
     distance = min_fold.hfold_centroid(tree);
     centroid_structure = min_fold.centroid_structure;
-    min_fold.hfold_fatgraph(fatgraphs,num_fatgraphs);
+    min_fold.hfold_fatgraph(fatgraphs,fatgraphsSix,num_fatgraphs);
     diversity = min_fold.ensemble_diversity;
     frequency = min_fold.frequency;
     return structure;
@@ -220,7 +220,7 @@ void seqtoRNA(std::string &sequence) {
     }
 }
 
-void print_results(std::vector<Result> &result_list, std::vector<std::vector<std::pair<std::string,double>>> &fatgraphs, std::string &fileO, int number_of_output){
+void print_results(std::vector<Result> &result_list, std::vector<std::vector<std::pair<std::string,double>>> &fatgraphs,std::vector<std::vector<std::pair<std::string,double>>> &fatgraphsSix, std::string &fileO, int number_of_output, bool levelsix){
     if (fileO != "") {
         std::ofstream out(fileO,std::fstream::app);
         out << result_list[0].get_sequence() << std::endl;
@@ -238,6 +238,12 @@ void print_results(std::vector<Result> &result_list, std::vector<std::vector<std
             out << "Result_" << i << ":     ";
             for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
                out << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
+            }
+            out << std::endl;
+            if(levelsix){
+                for(size_t j=0; j<fatgraphsSix[fatgraph_num].size();++j){
+                    out << fatgraphsSix[fatgraph_num][j].first << "\t(" << fatgraphsSix[fatgraph_num][j].second << ")\t";
+                }
             }
             out << std::endl;
             out << "frequency of MFE structure in ensemble: " << result_list[i].get_frequency() << "; ensemble diversity " << result_list[i].get_diversity() << std::endl;
@@ -259,6 +265,12 @@ void print_results(std::vector<Result> &result_list, std::vector<std::vector<std
                std::cout << std::fixed << std::setprecision(4) << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
             }
             std::cout << std::endl;
+            if(levelsix){
+                for(size_t j=0; j<fatgraphsSix[fatgraph_num].size();++j){
+                    std::cout << std::fixed << std::setprecision(4) << fatgraphsSix[fatgraph_num][j].first << "\t(" << fatgraphsSix[fatgraph_num][j].second << ")\t";
+                }
+            }
+            std::cout << std::endl;
             std::cout << "frequency of MFE structure in ensemble: " << result_list[0].get_frequency() << "; ensemble diversity " << result_list[0].get_diversity() << std::endl;
         } else {
             for (cand_pos_t i = 0; i < number_of_output; i++) {
@@ -277,6 +289,12 @@ void print_results(std::vector<Result> &result_list, std::vector<std::vector<std
                 std::cout << "Result_" << i << ":     ";
                 for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
                     std::cout << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
+                }
+                std::cout << std::endl;
+                if(levelsix){
+                    for(size_t j=0; j<fatgraphsSix[fatgraph_num].size();++j){
+                        std::cout << std::fixed << std::setprecision(4) << fatgraphsSix[fatgraph_num][j].first << "\t(" << fatgraphsSix[fatgraph_num][j].second << ")\t";
+                    }
                 }
                 std::cout << std::endl;
                 std::cout << "frequency of MFE structure in ensemble: " << result_list[i].get_frequency() << "; ensemble diversity " << result_list[i].get_diversity() << std::endl;
@@ -380,11 +398,12 @@ int main(int argc, char *argv[]) {
         pf_t energy,energy_pf,MEA,distance,frequency,diversity;
         std::string MEA_structure,centroid_structure;
         std::vector<std::vector<std::pair<std::string,double>>> fatgraphs(num_fatgraph);
+        std::vector<std::vector<std::pair<std::string,double>>> fatgraphsSix(num_fatgraph);
         for (cand_pos_t i = 0; i < size; ++i) {
             std::string structure = hotspot_list[i].get_structure();
             sparse_tree tree(structure, n);
             std::string final_structure = hfold(current.sequence, structure, energy, tree,ShapeData, pk_free, pk_only, dangles);
-            std::string final_structure_pf = hfold_pf(current.sequence, final_structure, energy_pf,MEA_structure,MEA,centroid_structure,fatgraphs[i],distance,frequency, diversity,num_fatgraph, tree,ShapeData, pk_free,pk_only,level6, dangles, energy, num_samples, print_samples, PSplot, gamma);
+            std::string final_structure_pf = hfold_pf(current.sequence, final_structure, energy_pf,MEA_structure,MEA,centroid_structure,fatgraphs[i],fatgraphsSix[i],distance,frequency, diversity,num_fatgraph, tree,ShapeData, pk_free,pk_only, dangles, energy, num_samples, print_samples, PSplot, gamma);
             if (!args_info.input_structure_given && energy > 0.0) {
                 energy = 0.0;
                 energy_pf = 0.0;
@@ -403,7 +422,7 @@ int main(int argc, char *argv[]) {
         if (number_of_suboptimal_structure != 1) {
             number_of_output = std::min((int)result_list.size(), number_of_suboptimal_structure);
         }
-        print_results(result_list,fatgraphs,fileO,number_of_output);
+        print_results(result_list,fatgraphs,fatgraphsSix,fileO,number_of_output,level6);
     }
 
     // output to file

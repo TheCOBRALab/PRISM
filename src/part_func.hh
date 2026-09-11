@@ -48,13 +48,12 @@ class W_final_pf {
     std::string centroid_structure;
     int num_samples;
     bool print_samples;
-    bool level6;
     pf_t frequency;
     pf_t ensemble_diversity;
     std::unordered_map<std::string, int> structures;
     double gamma;
 
-    W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &ShapeData, bool pk_free, bool pk_only, bool level6, int dangle, double energy, int num_samples, bool print_samples, bool PSplot, double gamma);
+    W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &ShapeData, bool pk_free, bool pk_only, int dangle, double energy, int num_samples, bool print_samples, bool PSplot, double gamma);
     // constructor for the restricted mfe case
 
     ~W_final_pf();
@@ -66,7 +65,7 @@ class W_final_pf {
 
     pf_t hfold_centroid(sparse_tree &tree);
 
-    void hfold_fatgraph(std::vector<std::pair<std::string,double>> &fatgraphs, int &num_fatgraphs);
+    void hfold_fatgraph(std::vector<std::pair<std::string,double>> &fatgraphs,std::vector<std::pair<std::string,double>> &fatgraphsSix, int &num_fatgraphs);
 
     vrna_exp_param_t *exp_params_;
 
@@ -239,7 +238,7 @@ class W_final_pf {
     pf_t compute_MEA(sparse_tree &tree, double gamma);
     std::string compute_centroid(sparse_tree &tree, pf_t &dist, pf_t &diversity);
     std::string compute_centroid_PK_only(sparse_tree &tree, pf_t &dist, pf_t &diversity);
-    std::string get_fatgraph(std::string structure);
+    std::pair<std::string,std::string> get_fatgraph(std::string structure);
 };
 
 #endif
