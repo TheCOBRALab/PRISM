@@ -75,8 +75,8 @@ struct args_info
   int fatgraph_arg;	/**< @brief Give the number of fatgraphs outputted, along with their frequencies (default 1) (default='1').  */
   char * fatgraph_orig;	/**< @brief Give the number of fatgraphs outputted, along with their frequencies (default 1) original value given at command line.  */
   const char *fatgraph_help; /**< @brief Give the number of fatgraphs outputted, along with their frequencies (default 1) help description.  */
-  int level_flag;	/**< @brief Change the RNA shape to level 6 (Default is 5) (default=off).  */
-  const char *level_help; /**< @brief Change the RNA shape to level 6 (Default is 5) help description.  */
+  int level_flag;	/**< @brief Print the level 6 RNA shape along with the default (Default is 5) (default=off).  */
+  const char *level_help; /**< @brief Print the level 6 RNA shape along with the default (Default is 5) help description.  */
   int noConv_flag;	/**< @brief Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA (default=off).  */
   const char *noConv_help; /**< @brief Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA help description.  */
   int noPS_flag;	/**< @brief Don't create a Postscript drawing of the base pair probabilities (default=off).  */

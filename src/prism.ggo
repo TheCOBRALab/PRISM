@@ -63,7 +63,7 @@ option "fatgraph" f
     int default="1" optional
 
 option "level" L
-    "Change the RNA shape to level 6 (Default is 5)"
+    "Print the level 6 RNA shape along with the default (Default is 5)"
     flag off
 
 option "noConv" -

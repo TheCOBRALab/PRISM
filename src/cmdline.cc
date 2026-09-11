@@ -49,7 +49,7 @@ const char *args_info_help[] = {
   "  -g, --gamma=DOUBLE            Give the gamma value weighting of base pairs in\n                                  the MEA (default: 1)  (default=`1')",
   "  -S, --shape=STRING            Give a path to a shape file corresponding to\n                                  the sequence given",
   "  -f, --fatgraph=INT            Give the number of fatgraphs outputted, along\n                                  with their frequencies (default 1)\n                                  (default=`1')",
-  "  -L, --level                   Change the RNA shape to level 6 (Default is 5)\n                                  (default=off)",
+  "  -L, --level                   Print the level 6 RNA shape along with the\n                                  default (Default is 5)  (default=off)",
   "      --noConv                  Do not convert DNA into RNA. This will use the\n                                  Matthews 2004 parameters for DNA\n                                  (default=off)",
   "      --noPS                    Don't create a Postscript drawing of the base\n                                  pair probabilities  (default=off)",
   "\nThe input sequence is read from standard input, unless it is\ngiven on the command line.\n",
@@ -784,7 +784,7 @@ cmdline_parser_internal (
             goto failure;
         
           break;
-        case 'L':	/* Change the RNA shape to level 6 (Default is 5).  */
+        case 'L':	/* Print the level 6 RNA shape along with the default (Default is 5).  */
         
         
           if (update_arg((void *)&(args_info->level_flag), 0, &(args_info->level_given),

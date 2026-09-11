@@ -91,7 +91,7 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
   -P, --paramFile        Read energy parameters from paramfile, instead of using the default parameter set.\n
   -s, --samples          Give the number of samples foe the stochastic backtracking (default 1000)
   -S, --shape            Give a path to a shape file corresponding to the sequence given
-  -L, --level            Change the RNA shape to level 6 (Default is 5)
+  -L, --level            Print the level 6 RNA shape along with the default (Default is 5)
       --noConv           Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA
       --noPS             Don't create a Postscript drawing of the base pair probabilities
 
@@ -153,6 +153,8 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
         Dot plot Postscript files give the output in graphical form. Input constraints
         are in black and other probabilities are in red. The MFE structure is in the
         bottom left while the probability structure is in the top right.
+
+        If the level cmdline option is used, the shape line will instead take up two lines.
 
 #### Example:
 
