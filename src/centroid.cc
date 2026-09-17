@@ -298,5 +298,6 @@ std::pair<std::string,std::string> W_final_pf::get_fatgraph(std::string structur
     up.resize(levelsix.length(),0);
     generate_pt(levelsix,fres,up,levelsix.length());
     std::string fatgraphSix = generate_fatgraph(levelsix,fres,up,levelsix.length());
+    fatgraphSix = canonicalize_fatgraph(fatgraphSix);
     return std::pair<std::string,std::string> {fatgraph,fatgraphSix};
 }
