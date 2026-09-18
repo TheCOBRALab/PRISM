@@ -815,7 +815,7 @@ void W_final_pf::Sample_W(cand_pos_t start, cand_pos_t end, std::string &structu
 
 void W_final_pf::Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure,
                           std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("V at %d and %d\n", i, j);
+    if (debug) printf("V at %d and %d with V[i,j]=%f,%f\n", i, j,V.get(i,j), to_Energy(V.get(i,j), j-i+1));
 
     cand_pos_t k = i;
     cand_pos_t l = j;
@@ -877,7 +877,7 @@ void W_final_pf::Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure,
 
 void W_final_pf::Sample_VM(cand_pos_t i, cand_pos_t j, std::string &structure,
                            std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("VM at %d and %d\n", i, j);
+    if (debug) printf("VM at %d and %d with VM[i,j] = %f,%f\n", i, j, VM.get(i,j), to_Energy(VM.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t qt = 0;
     if ((i + 1) + 2 * TURN + 2 >= (j - 1)) {
@@ -929,7 +929,7 @@ void W_final_pf::Sample_VM(cand_pos_t i, cand_pos_t j, std::string &structure,
 }
 void W_final_pf::Sample_WM(cand_pos_t i, cand_pos_t j, std::string &structure,
                            std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("WM at %d and %d\n", i, j);
+    if (debug) printf("WM at %d and %d with WM[i,j] = %f,%f\n", i, j, WM.get(i,j), to_Energy(WM.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t qt = 0;
     pf_t qbt1 = 0;
@@ -1010,7 +1010,7 @@ void W_final_pf::Sample_WM(cand_pos_t i, cand_pos_t j, std::string &structure,
 }
 void W_final_pf::Sample_WMV(cand_pos_t i, cand_pos_t j, std::string &structure,
                             std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("WMv at %d and %d\n", i, j);
+    if (debug) printf("WMv at %d and %d with WMv[i,j] = %f,%f\n", i, j, WMv.get(i,j), to_Energy(WMv.get(i,j), j-i+1));
 
     pf_t V_temp = 0.;
 
@@ -1037,7 +1037,7 @@ void W_final_pf::Sample_WMV(cand_pos_t i, cand_pos_t j, std::string &structure,
 
 void W_final_pf::Sample_WMP(cand_pos_t i, cand_pos_t j, std::string &structure,
                             std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("WMp at %d and %d\n", i, j);
+    if (debug) printf("WMp at %d and %d with WMp[i,j] = %f,%f\n", i, j, WMp.get(i,j), to_Energy(WMp.get(i,j), j-i+1));
 
     pf_t V_temp = 0.;
 
@@ -1064,7 +1064,7 @@ void W_final_pf::Sample_WMP(cand_pos_t i, cand_pos_t j, std::string &structure,
 
 void W_final_pf::Sample_WMB(cand_pos_t i, cand_pos_t j, std::string &structure,
                             std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("WMB at %d and %d\n", i, j);
+    if (debug) printf("WMB at %d and %d with WMB[i,j] = %f,%f\n", i, j, WMB.get(i,j), to_Energy(WMB.get(i,j), j-i+1));
     cand_pos_t l = j;
     pf_t qt = 0;
     cand_pos_t Bp_lj = 0;
@@ -1105,7 +1105,7 @@ void W_final_pf::Sample_WMB(cand_pos_t i, cand_pos_t j, std::string &structure,
 
 void W_final_pf::Sample_WI(cand_pos_t i, cand_pos_t j, std::string &structure,
                            std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("WI at %d and %d\n", i, j);
+    if (debug) printf("WI at %d and %d with WI[i,j] = %f,%f\n", i, j, WI.get(i,j), to_Energy(WI.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t qt = 0, qbt1 = 0, qbt2 = 0;
     bool pseudoknot = false;
@@ -1158,7 +1158,7 @@ void W_final_pf::Sample_WI(cand_pos_t i, cand_pos_t j, std::string &structure,
 
 void W_final_pf::Sample_WIP(cand_pos_t i, cand_pos_t j, std::string &structure,
                             std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("WIP at %d and %d\n", i, j);
+    if (debug) printf("WIP at %d and %d with WIP[i,j] = %f,%f\n", i, j,WIP.get(i,j), to_Energy(WIP.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t fbd = 0;
     pf_t qt = 0, qbt1 = 0, qbt2 = 0;
@@ -1241,7 +1241,7 @@ void W_final_pf::Sample_WIP(cand_pos_t i, cand_pos_t j, std::string &structure,
 
 void W_final_pf::Sample_WMBW(cand_pos_t i, cand_pos_t j, std::string &structure,
                              std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("WMBW at %d and %d\n", i, j);
+    if (debug) printf("WMBW at %d and %d, with WMBW[i,j] = %f,%f\n", i, j,WMBW.get(i,j), to_Energy(WMBW.get(i,j), j-i+1));
     cand_pos_t l = j;
     pf_t fbd = 0;
     pf_t qt = 0;
@@ -1271,7 +1271,7 @@ void W_final_pf::Sample_WMBW(cand_pos_t i, cand_pos_t j, std::string &structure,
 
 void W_final_pf::Sample_WMBP(cand_pos_t i, cand_pos_t j, std::string &structure,
                              std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("WMBP at %d and %d\n", i, j);
+    if (debug) printf("WMBP at %d and %d with WMBP[i,j] = %f,%f\n", i, j, WMBP.get(i,j), to_Energy(WMBP.get(i,j), j-i+1));
     cand_pos_t l = j;
     pf_t qt = 0;
     cand_pos_t bp_il = 0;
@@ -1377,7 +1377,7 @@ void W_final_pf::Sample_WMBP(cand_pos_t i, cand_pos_t j, std::string &structure,
 
 void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
                            std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("VP at %d and %d\n", i, j);
+    if (debug) printf("VP at %d and %d with VP[i,j] = %f,%f\n", i, j,VP.get(i,j), to_Energy(VP.get(i,j), j-i+1));
     cand_pos_t k, l;
     pf_t qt = 0;
     structure[i - 1] = '[';
@@ -1532,7 +1532,7 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
 
 void W_final_pf::Sample_VPL(cand_pos_t i, cand_pos_t j, std::string &structure,
                             std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("VPL at %d and %d\n", i, j);
+    if (debug) printf("VPL at %d and %d with VPL[i,j] = %f,%f\n", i, j, VPL.get(i,j), to_Energy(VPL.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t fbd = 0;
     pf_t qt = 0;
@@ -1560,7 +1560,7 @@ void W_final_pf::Sample_VPL(cand_pos_t i, cand_pos_t j, std::string &structure,
 
 void W_final_pf::Sample_VPR(cand_pos_t i, cand_pos_t j, std::string &structure,
                             std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
-    if (debug) printf("VPR at %d and %d\n", i, j);
+    if (debug) printf("VPR at %d and %d with VPR[i,j] = %f,%f\n", i, j,VPR.get(i,j), to_Energy(VPR.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t fbd = 0;
     pf_t qt = 0;
