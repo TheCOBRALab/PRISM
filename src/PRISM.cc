@@ -8,6 +8,7 @@
 #include "SHAPE.hh"
 // a simple driver for the HFold
 #include <algorithm>
+#include <queue>
 #include <fstream>
 #include <getopt.h>
 #include <iostream>
@@ -220,21 +221,98 @@ void seqtoRNA(std::string &sequence) {
     }
 }
 
-void print_results(std::vector<Result> &result_list, std::vector<std::vector<std::pair<std::string,double>>> &fatgraphs,std::vector<std::vector<std::pair<std::string,double>>> &fatgraphsSix, std::string &fileO, int number_of_output, bool levelsix){
+void generate_pt(const std::string &structure, std::vector<std::pair<int,int> > &pairs){
+    std::vector<int> paren,square;
+    cand_pos_t n = structure.length();
+
+    for(int j = 0;j<n;++j){
+        switch(structure[j]){
+            case '(': paren.push_back(j); break;
+            case '[': square.push_back(j); break;
+            case ')': { int i = paren.back();  paren.pop_back();  pairs.push_back(std::make_pair(i,j)); break; }
+            case ']': { int i = square.back(); square.pop_back(); pairs.push_back(std::make_pair(i,j)); break; }
+        }
+    }
+    for(auto *stack : {&paren, &square}){
+        if(!stack->empty()){
+            std::cerr << "Error: unmatched brackets in: " << structure << std::endl;
+            exit(1);
+        }
+    }
+}
+
+inline bool crosses(cand_pos_t i, cand_pos_t j, cand_pos_t k, cand_pos_t l) {
+    return (i < k && k < j && j < l) || (k < i && i < l && l < j);
+}
+
+std::string simplify_structure(const std::string &structure){
+    cand_pos_t n = structure.length();
+    std::vector<std::pair<int,int> > pairs;
+    generate_pt(structure,pairs);
+    cand_pos_t n_pairs = pairs.size();
+    std::vector<std::vector<int>> adj(n_pairs);
+    for (cand_pos_t i = 0; i < n_pairs; ++i) {
+        for (cand_pos_t j = i + 1; j < n_pairs; ++j) {
+            if (crosses(pairs[i].first,pairs[i].second, pairs[j].first,pairs[j].second)) {
+                adj[i].push_back(j);
+                adj[j].push_back(i);
+            }
+        }
+    }
+    // BFS 2-coloring (bipartiteness check)
+    std::vector<int> color(n_pairs, -1);   // -1 = uncolored, 0/1 = colors
+    bool twoColorable = true;
+
+    for (cand_pos_t start = 0; start < n_pairs && twoColorable; ++start) {
+        if (color[start] != -1) continue;  // already colored in a prior component
+
+        color[start] = 0;
+        std::queue<int> q;
+        q.push(start);
+
+        while (!q.empty() && twoColorable) {
+            int u = q.front(); q.pop();
+            for (int v : adj[u]) {
+                if (color[v] == -1) {
+                    color[v] = 1 - color[u];   // opposite color
+                    q.push(v);
+                } else if (color[v] == color[u]) {
+                    std::cerr << "Error in coloring occurred" << std::endl;
+                    exit(1);
+                }
+            }
+        }
+    }
+
+    std::string new_structure = std::string(n,'.');
+    
+    for (cand_pos_t k = 0; k < n_pairs; ++k) {
+        char open  = (color[k] == 0) ? '(' : '[';
+        char close = (color[k] == 0) ? ')' : ']';
+        new_structure[pairs[k].first] = open;
+        new_structure[pairs[k].second] = close;
+    }
+    return new_structure; 
+}
+
+void print_results(std::vector<Result> &result_list, std::vector<std::vector<std::pair<std::string,double>>> &fatgraphs,std::vector<std::vector<std::pair<std::string,double>>> &fatgraphsSix, std::string &fileO, int number_of_output, bool levelsix, bool simplified){
     if (fileO != "") {
         std::ofstream out(fileO,std::fstream::app);
         out << result_list[0].get_sequence() << std::endl;
         for (cand_pos_t i = 0; i < number_of_output; i++) {
             if (i>0 && result_list[i].get_final_structure() == result_list[i - 1].get_final_structure()) continue;
             int fatgraph_num = result_list[i].get_fatgraph_num();
+            std::string mfe_structure = simplified ? simplify_structure(result_list[i].get_final_structure()) : result_list[i].get_final_structure();
+            std::string mea_structure = simplified ? simplify_structure(result_list[i].get_MEA_structure()) : result_list[i].get_MEA_structure();
+            std::string centroid_structure = simplified ? simplify_structure(result_list[i].get_centroid_structure()) : result_list[i].get_centroid_structure();
             out << "Restricted_" << i << ": " << result_list[i].get_restricted() << " (" << result_list[i].get_restricted_energy() << ")"
                 << std::endl;
-            out << "Result_" << i << ":     " << result_list[i].get_final_structure() << " (" << result_list[i].get_final_energy() << ")"
+            out << "Result_" << i << ":     " << mfe_structure << " (" << result_list[i].get_final_energy() << ")"
                 << std::endl;
             out << "Result_" << i << ":     " << result_list[i].get_final_structure_pf() << " (" << result_list[i].get_pf_energy() << ")"
                 << std::endl;
-            out << "Result_" << i << ":     " << result_list[i].get_MEA_structure() << " (" << result_list[i].get_MEA() << ")" << std::endl;
-            out << "Result_" << i << ":     " << result_list[i].get_centroid_structure() << " (" << result_list[i].get_distance() << ")" << std::endl;
+            out << "Result_" << i << ":     " << mea_structure << " (" << result_list[i].get_MEA() << ")" << std::endl;
+            out << "Result_" << i << ":     " << centroid_structure << " (" << result_list[i].get_distance() << ")" << std::endl;
             out << "Result_" << i << ":     ";
             for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
                out << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
@@ -255,12 +333,15 @@ void print_results(std::vector<Result> &result_list, std::vector<std::vector<std
         // changed format for ouptut to stdout
         std::cout << result_list[0].get_sequence() << std::endl;
         if (result_list.size() == 1) {
+            std::string mfe_structure = simplified ? simplify_structure(result_list[0].get_final_structure()) : result_list[0].get_final_structure();
+            std::string mea_structure = simplified ? simplify_structure(result_list[0].get_MEA_structure()) : result_list[0].get_MEA_structure();
+            std::string centroid_structure = simplified ? simplify_structure(result_list[0].get_centroid_structure()) : result_list[0].get_centroid_structure();
             int fatgraph_num = result_list[0].get_fatgraph_num();
             std::cout << result_list[0].get_restricted() << std::endl;
-            std::cout << result_list[0].get_final_structure() << " (" << result_list[0].get_final_energy() << ")" << std::endl;
+            std::cout << mfe_structure << " (" << result_list[0].get_final_energy() << ")" << std::endl;
             std::cout << result_list[0].get_final_structure_pf() << " (" << result_list[0].get_pf_energy() << ")" << std::endl;
-            std::cout << result_list[0].get_MEA_structure() << " (" << result_list[0].get_MEA() << ")" << std::endl;
-            std::cout << result_list[0].get_centroid_structure() << " (" << result_list[0].get_distance() << ")" << std::endl;
+            std::cout << mea_structure << " (" << result_list[0].get_MEA() << ")" << std::endl;
+            std::cout << centroid_structure << " (" << result_list[0].get_distance() << ")" << std::endl;
             for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
                std::cout << std::fixed << std::setprecision(4) << fatgraphs[fatgraph_num][j].first << "\t(" << fatgraphs[fatgraph_num][j].second << ")\t";
             }
@@ -275,16 +356,19 @@ void print_results(std::vector<Result> &result_list, std::vector<std::vector<std
         } else {
             for (cand_pos_t i = 0; i < number_of_output; i++) {
                 if (i>0 && result_list[i].get_final_structure() == result_list[i - 1].get_final_structure()) continue;
+                std::string mfe_structure = simplified ? simplify_structure(result_list[i].get_final_structure()) : result_list[i].get_final_structure();
+                std::string mea_structure = simplified ? simplify_structure(result_list[i].get_MEA_structure()) : result_list[i].get_MEA_structure();
+                std::string centroid_structure = simplified ? simplify_structure(result_list[i].get_centroid_structure()) : result_list[i].get_centroid_structure();
                 int fatgraph_num = result_list[i].get_fatgraph_num();
                 std::cout << "Restricted_" << i << ": " << result_list[i].get_restricted() << " (" << result_list[i].get_restricted_energy() << ")"
                           << std::endl;
-                std::cout << "Result_" << i << ":     " << result_list[i].get_final_structure() << " (" << result_list[i].get_final_energy() << ")"
+                std::cout << "Result_" << i << ":     " << mfe_structure << " (" << result_list[i].get_final_energy() << ")"
                           << std::endl;
                 std::cout << "Result_" << i << ":     " << result_list[i].get_final_structure_pf() << " (" << result_list[i].get_pf_energy() << ")"
                           << std::endl;
-                std::cout << "Result_" << i << ":     " << result_list[i].get_MEA_structure() << " (" << result_list[i].get_MEA() << ")"
+                std::cout << "Result_" << i << ":     " << mea_structure << " (" << result_list[i].get_MEA() << ")"
                           << std::endl;
-                std::cout << "Result_" << i << ":     " << result_list[i].get_centroid_structure() << " (" << result_list[i].get_distance() << ")"
+                std::cout << "Result_" << i << ":     " << centroid_structure << " (" << result_list[i].get_distance() << ")"
                           << std::endl;
                 std::cout << "Result_" << i << ":     ";
                 for(size_t j=0; j<fatgraphs[fatgraph_num].size();++j){
@@ -343,6 +427,8 @@ int main(int argc, char *argv[]) {
     bool level6 = args_info.level_flag;
 
     bool PSplot = !args_info.noPS_flag;
+
+    bool simplified = args_info.simple_flag;
 
     int num_fatgraph = args_info.fatgraph_given ? args_info.fatgraph_arg : 1;
 
@@ -422,7 +508,7 @@ int main(int argc, char *argv[]) {
         if (number_of_suboptimal_structure != 1) {
             number_of_output = std::min((int)result_list.size(), number_of_suboptimal_structure);
         }
-        print_results(result_list,fatgraphs,fatgraphsSix,fileO,number_of_output,level6);
+        print_results(result_list,fatgraphs,fatgraphsSix,fileO,number_of_output,level6,simplified);
     }
 
     // output to file

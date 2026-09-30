@@ -66,6 +66,10 @@ option "level" L
     "Print the level 6 RNA shape along with the default (Default is 5)"
     flag off
 
+option "simple" -
+    "Print the simplest representation of the structures (least crossing base pairs) for MFE, MEA, and centroid"
+    flag off
+
 option "noConv" -
     "Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA"
     flag off

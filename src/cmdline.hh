@@ -77,6 +77,8 @@ struct args_info
   const char *fatgraph_help; /**< @brief Give the number of fatgraphs outputted, along with their frequencies (default 1) help description.  */
   int level_flag;	/**< @brief Print the level 6 RNA shape along with the default (Default is 5) (default=off).  */
   const char *level_help; /**< @brief Print the level 6 RNA shape along with the default (Default is 5) help description.  */
+  int simple_flag;	/**< @brief Print the simplest representation of the structures (least crossing base pairs) for MFE, MEA, and centroid (default=off).  */
+  const char *simple_help; /**< @brief Print the simplest representation of the structures (least crossing base pairs) for MFE, MEA, and centroid help description.  */
   int noConv_flag;	/**< @brief Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA (default=off).  */
   const char *noConv_help; /**< @brief Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA help description.  */
   int noPS_flag;	/**< @brief Don't create a Postscript drawing of the base pair probabilities (default=off).  */
@@ -98,6 +100,7 @@ struct args_info
   unsigned int shape_given ;	/**< @brief Whether shape was given.  */
   unsigned int fatgraph_given ;	/**< @brief Whether fatgraph was given.  */
   unsigned int level_given ;	/**< @brief Whether level was given.  */
+  unsigned int simple_given ;	/**< @brief Whether simple was given.  */
   unsigned int noConv_given ;	/**< @brief Whether noConv was given.  */
   unsigned int noPS_given ;	/**< @brief Whether noPS was given.  */
 

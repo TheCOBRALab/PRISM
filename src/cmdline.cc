@@ -50,6 +50,7 @@ const char *args_info_help[] = {
   "  -S, --shape=STRING            Give a path to a shape file corresponding to\n                                  the sequence given",
   "  -f, --fatgraph=INT            Give the number of fatgraphs outputted, along\n                                  with their frequencies (default 1)\n                                  (default=`1')",
   "  -L, --level                   Print the level 6 RNA shape along with the\n                                  default (Default is 5)  (default=off)",
+  "      --simple                  Print the simplest representation of the\n                                  structures (least crossing base pairs) for\n                                  MFE, MEA, and centroid  (default=off)",
   "      --noConv                  Do not convert DNA into RNA. This will use the\n                                  Matthews 2004 parameters for DNA\n                                  (default=off)",
   "      --noPS                    Don't create a Postscript drawing of the base\n                                  pair probabilities  (default=off)",
   "\nThe input sequence is read from standard input, unless it is\ngiven on the command line.\n",
@@ -95,6 +96,7 @@ void clear_given (struct args_info *args_info)
   args_info->shape_given = 0 ;
   args_info->fatgraph_given = 0 ;
   args_info->level_given = 0 ;
+  args_info->simple_given = 0 ;
   args_info->noConv_given = 0 ;
   args_info->noPS_given = 0 ;
 }
@@ -127,6 +129,7 @@ void clear_args (struct args_info *args_info)
   args_info->fatgraph_arg = 1;
   args_info->fatgraph_orig = NULL;
   args_info->level_flag = 0;
+  args_info->simple_flag = 0;
   args_info->noConv_flag = 0;
   args_info->noPS_flag = 0;
   
@@ -153,8 +156,9 @@ void init_args_info(struct args_info *args_info)
   args_info->shape_help = args_info_help[13] ;
   args_info->fatgraph_help = args_info_help[14] ;
   args_info->level_help = args_info_help[15] ;
-  args_info->noConv_help = args_info_help[16] ;
-  args_info->noPS_help = args_info_help[17] ;
+  args_info->simple_help = args_info_help[16] ;
+  args_info->noConv_help = args_info_help[17] ;
+  args_info->noPS_help = args_info_help[18] ;
   
 }
 
@@ -329,6 +333,8 @@ cmdline_parser_dump(FILE *outfile, struct args_info *args_info)
     write_into_file(outfile, "fatgraph", args_info->fatgraph_orig, 0);
   if (args_info->level_given)
     write_into_file(outfile, "level", 0, 0 );
+  if (args_info->simple_given)
+    write_into_file(outfile, "simple", 0, 0 );
   if (args_info->noConv_given)
     write_into_file(outfile, "noConv", 0, 0 );
   if (args_info->noPS_given)
@@ -613,6 +619,7 @@ cmdline_parser_internal (
         { "shape",	1, NULL, 'S' },
         { "fatgraph",	1, NULL, 'f' },
         { "level",	0, NULL, 'L' },
+        { "simple",	0, NULL, 0 },
         { "noConv",	0, NULL, 0 },
         { "noPS",	0, NULL, 0 },
         { 0,  0, 0, 0 }
@@ -796,8 +803,20 @@ cmdline_parser_internal (
           break;
 
         case 0:	/* Long option with no short option */
+          /* Print the simplest representation of the structures (least crossing base pairs) for MFE, MEA, and centroid.  */
+          if (strcmp (long_options[option_index].name, "simple") == 0)
+          {
+          
+          
+            if (update_arg((void *)&(args_info->simple_flag), 0, &(args_info->simple_given),
+                &(local_args_info.simple_given), optarg, 0, 0, ARG_FLAG,
+                check_ambiguity, override, 1, 0, "simple", '-',
+                additional_error))
+              goto failure;
+          
+          }
           /* Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA.  */
-          if (strcmp (long_options[option_index].name, "noConv") == 0)
+          else if (strcmp (long_options[option_index].name, "noConv") == 0)
           {
           
           

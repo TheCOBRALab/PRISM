@@ -92,6 +92,7 @@ Read input file from cmdline; predict minimum free energy, ensemble energy, opti
   -s, --samples          Give the number of samples foe the stochastic backtracking (default 1000)
   -S, --shape            Give a path to a shape file corresponding to the sequence given
   -L, --level            Print the level 6 RNA shape along with the default (Default is 5)
+      --simple           Print the simplest representation of the structures (least crossing base pairs) for MFE, MEA, and centroid
       --noConv           Do not convert DNA into RNA. This will use the Matthews 2004 parameters for DNA
       --noPS             Don't create a Postscript drawing of the base pair probabilities
 
