@@ -454,7 +454,7 @@ void W_final_pf::compute_VPR(cand_pos_t i, cand_pos_t j, sparse_tree &tree) {
     for (cand_pos_t k = max_i_bp + 1; k < j; ++k) {
         bool can_pair = tree.up[j - 1] >= (j - k);
         contributions += (VP.get(i, k) * WIP.get(k + 1, j));
-        if (can_pair) contributions += (VP.get(i, k) * expcp_pen[k - i]);
+        if (can_pair) contributions += (VP.get(i, k) * expcp_pen[j - k]);
     }
     VPR.set(i,j) = contributions;
 }
