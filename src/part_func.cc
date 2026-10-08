@@ -651,7 +651,7 @@ void W_final_pf::compute_WMB(cand_pos_t i, cand_pos_t j, sparse_tree &tree) {
         for (cand_pos_t l = (bp_j + 1); (l < j); ++l) {
             // if(tree.tree[l].pair>0) continue;
             cand_pos_t Bp_lj = tree.Bp(l, j);
-            if (Bp_lj >= 0 && Bp_lj < n) {
+            if (Bp_lj > 0 && Bp_lj <= n) {
                 contributions +=
                     get_BE(bp_j, j, tree.tree[Bp_lj].pair, Bp_lj, tree) * WMBP.get(i,l) * WI.get(l + 1, Bp_lj - 1) * expPB_penalty;
             }
@@ -1079,7 +1079,7 @@ void W_final_pf::Sample_WMB(cand_pos_t i, cand_pos_t j, std::string &structure,
         for (l = (bp_j + 1); (l < j); ++l) {
             // if(tree.tree[l].pair>0) continue;
             Bp_lj = tree.Bp(l, j);
-            if (Bp_lj >= 0 && Bp_lj < n) {
+            if (Bp_lj > 0 && Bp_lj <= n) {
                 V_temp = get_BE(bp_j, j, tree.tree[Bp_lj].pair, Bp_lj, tree) * WMBP.get(i,l) * WI.get(l+1, Bp_lj-1) * expPB_penalty;
                 qt += V_temp;
                 if (qt > r) {
