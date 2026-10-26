@@ -153,8 +153,11 @@ pf_t W_final_pf::hfold_pf(sparse_tree &tree) {
             const bool evaluate = tree.weakly_closed(i, j);
             const pair_type ptype_closing = pair[S_[i]][S_[j]];
             const bool restricted = tree.tree[i].pair == -1 || tree.tree[j].pair == -1;
+            const bool paired = (tree.tree[i].pair == j && tree.tree[j].pair == i);
 
-            if (ptype_closing > 0 && evaluate && !restricted & !pk_only) compute_energy_restricted(i, j, tree);
+            const bool pkonly = (!pk_only || paired);
+
+            if (ptype_closing > 0 && evaluate && !restricted & pkonly) compute_energy_restricted(i, j, tree);
 
             if (!pk_free) compute_pk_energies(i, j, tree);
 
@@ -555,7 +558,7 @@ pf_t W_final_pf::get_e_stP(cand_pos_t i, cand_pos_t j) {
     if (i + 1 == j - 1) { // TODO: do I need something like that or stack is taking care of this?
         return 0;
     }
-    pf_t e_st = compute_int(i, j, i + 1, j - 1)*ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
+    pf_t e_st = compute_int(i, j, i + 1, j - 1);
 
     return pow(e_st, e_stP_penalty);
 }

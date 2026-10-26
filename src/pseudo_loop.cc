@@ -384,7 +384,7 @@ void pseudo_loop::compute_VP(cand_pos_t i, cand_pos_t j) {
             cand_pos_t edge_j = k + j - i - MAXLOOP - 2;
             max_borders = std::max({max_borders, edge_j});
             for (cand_pos_t l = j - 1; l > max_borders; --l) {
-
+                if (k == i + 1 && l == j - 1) continue;
                 pair_type ptype_closingkj = pair[S_[k]][S_[l]];
                 if (tree->tree[l].pair < -1 && ptype_closingkj > 0 && (tree->up[(j)-1] >= ((j) - (l)-1))) {
                     // i and ip and j and jp should be in the same arc -- If it's unpaired between them, they have to be
@@ -647,7 +647,7 @@ energy_t pseudo_loop::get_e_stP(cand_pos_t i, cand_pos_t j) {
     if (i + 1 == j - 1) { // TODO: do I need something like that or stack is taking care of this?
         return INF;
     }
-    energy_t ss = compute_int(i, j, i + 1, j - 1) + ShapeData->get_calculated(i) + ShapeData->get_calculated(j);
+    energy_t ss = compute_int(i, j, i + 1, j - 1);
     return lrint(e_stP_penalty * ss);
 }
 

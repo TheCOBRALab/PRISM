@@ -39,6 +39,7 @@ void validateStructure(std::string &seq, std::string &structure) {
                 } else if ((seq[i] == 'G' && seq[j] == 'C') || (seq[i] == 'G' && seq[j] == 'U')) {
                 } else if ((seq[i] == 'U' && seq[j] == 'G') || (seq[i] == 'U' && seq[j] == 'A')) {
                 } else if ((seq[i] == 'T' && seq[j] == 'A') || (seq[i] == 'A' && seq[j] == 'T')) {
+                } else if ((seq[i] == 'T' && seq[j] == 'G') || (seq[i] == 'G' && seq[j] == 'T')) {
                 } else {
                     std::cerr << "Incorrect input: " << seq[i] << " does not pair with " << seq[j] << std::endl;
                     exit(0);
@@ -102,6 +103,10 @@ struct RNAEntry {
     }
 };
 
+inline bool is_structure_line(const std::string& str) {
+    return str.find_first_not_of("().[]{}<>") == std::string::npos;
+}
+
 std::vector<RNAEntry> get_all_file_entries(const std::string& file){
     if(!exists(file)){
         std::cerr << "Error: Input file not found: " << file << std::endl;
@@ -109,73 +114,58 @@ std::vector<RNAEntry> get_all_file_entries(const std::string& file){
     }
 
     // state machine to parse the file
-    #define UNINITIALIZED -1
-    #define NAME 0
-    #define SEQUENCE 1
-    #define STRUCTURE 2
+    enum class State { Uninitialized, Sequence, Structure };
 
     std::ifstream in(file.c_str());
-    RNAEntry current;
     std::vector<RNAEntry> entries;
-    int state = UNINITIALIZED;
+    RNAEntry current;
+    State state = State::Uninitialized;
     int line_number = 0;
 
     std::string str;
+
+    auto finish_entry = [&]() {
+        if (current.sequence.empty() && current.structure.empty()) {
+            std::cerr << "Warning: Sequence and structure are empty for entry: " << current.name << ". Skipping..." << std::endl;
+            return;
+        }
+        validateSequence(current.sequence);
+        validateStructure(current.sequence, current.structure);
+        entries.push_back(current);
+    };
     while(getline(in, str)){
         ++line_number;
         trim(str);
         if (str.empty()) continue;
 
         // Check if the line is the name of the entry
-        if ((state == UNINITIALIZED) && (str[0] != '>')) {
-            std::cerr << "Error: Expected '>' at the beginning of the line: " << str << ". Line number: " << line_number <<std::endl;
-            exit(EXIT_FAILURE);
-        }
-
-        if (str[0] == '>'){
-
-            if (!current.name.empty() && !current.sequence.empty() && current.structure.empty()) {
-                current.structure = "";
-            }
-
-            if (state != UNINITIALIZED) { // valid entry, save it
-                if (current.sequence.empty() && current.structure.empty()) {
-                    std::cerr << "Warning: Sequence and structure are empty for entry: " << current.name << ". Line number: " << line_number << ". Skipping..."<<  std::endl;
-                }
-                validateSequence(current.sequence);
-                validateStructure(current.sequence,current.structure);
-                entries.push_back(current);
-                current = RNAEntry();
-            }
-
+        if (str[0] == '>') {
+            if (state != State::Uninitialized) finish_entry();
+            current = RNAEntry();
             current.name = str.substr(1);
-            current.sequence = "";
-            current.structure = "";
-            state = SEQUENCE;
+            state = State::Sequence;
+            continue;
+        }
 
-        } else if (state == SEQUENCE){
-            if(str.find('(') != std::string::npos || str.find(')') != std::string::npos || str.find('.') != std::string::npos){
-                state = STRUCTURE;
-            } else{
-                current.sequence += str;
+        if (state == State::Uninitialized) {
+            std::cerr << "Error: Expected '>' at the beginning of the line: " << str << ". Line number: " << line_number << std::endl;
+            std::exit(EXIT_FAILURE);
+        }
+
+        if (is_structure_line(str)) {
+            state = State::Structure;
+            current.structure += str;
+        } else {
+            if (state == State::Structure) {
+                std::cerr << "Error: Sequence data found after structure data. Line number: " << line_number << std::endl;
+                std::exit(EXIT_FAILURE);
             }
-            
-        } else if (state == STRUCTURE) {
-            if(str[0] == '>'){
-                state = NAME;
-            } else {
-                current.structure += str;
-            }
+            std::transform(str.begin(), str.end(), str.begin(), ::toupper);
+            current.sequence += str;
         }
     }
-
-    // Handle the last entry
-    if (!current.name.empty() && !current.sequence.empty()) {
-        if (current.structure.empty()) {
-            current.structure = "";
-        }
-        entries.push_back(current);
-    }
+    // Handles the last entry
+    if (state != State::Uninitialized) finish_entry();
 
     return entries;
 }
@@ -436,7 +426,6 @@ int main(int argc, char *argv[]) {
 
     for(RNAEntry current : Inputs){
         cand_pos_t n = current.sequence.length();
-        std::transform(current.sequence.begin(), current.sequence.end(), current.sequence.begin(), ::toupper);
 	    if(!args_info.noConv_flag) seqtoRNA(current.sequence);
         if (pk_free) if (current.structure == "") current.structure = std::string(n,'.');
 
