@@ -41,7 +41,10 @@ W_final_pf::W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &S
     exp_params_rescale(MFE_en);
     // Allocate space
     TriangleMatrixPF::new_index(index,n+1);
-    W.resize(n+1,scale[1]);
+    W.resize(n+1);
+    for(int i = 1; i<=n; ++i){
+        W[i] = scale[i];
+    }
     V.init(n+1,index);
     VM.init(n+1,index);
     WM.init(n+1,index);
@@ -76,7 +79,7 @@ void W_final_pf::exp_params_rescale(double mfe) {
 
     if (exp_params_->pf_scale < 1.) exp_params_->pf_scale = 1.;
 
-    // exp_params_->pf_scale = 1.;
+    exp_params_->pf_scale = 1.;
     this->scale[0] = 1.;
     this->scale[1] = (pf_t)(1. / exp_params_->pf_scale);
     this->expMLbase[0] = 1;
