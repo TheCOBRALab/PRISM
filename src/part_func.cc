@@ -41,7 +41,7 @@ W_final_pf::W_final_pf(std::string &seq, std::string &MFE_structure,SHAPEData &S
     exp_params_rescale(MFE_en);
     // Allocate space
     TriangleMatrixPF::new_index(index,n+1);
-    W.resize(n+1);
+    W.resize(n + 1);
     for(int i = 1; i<=n; ++i){
         W[i] = scale[i];
     }
@@ -79,7 +79,7 @@ void W_final_pf::exp_params_rescale(double mfe) {
 
     if (exp_params_->pf_scale < 1.) exp_params_->pf_scale = 1.;
 
-    exp_params_->pf_scale = 1.;
+    // exp_params_->pf_scale = 1.;
     this->scale[0] = 1.;
     this->scale[1] = (pf_t)(1. / exp_params_->pf_scale);
     this->expMLbase[0] = 1;
@@ -103,9 +103,6 @@ void W_final_pf::rescale_pk_globals() {
     double TT = (exp_params_->model_details.temperature + K0) / (Tmeasure);
     int pf_smooth = exp_params_->model_details.pf_smooth;
     ShapeData->rescale_calculate(kT,TT,pf_smooth);
-    // for(int i = 0; i<30;++i){
-    //     std::cout << i << " " << ShapeData->get_calculated(i) << " " << ShapeData->get_expcalculated(i) << std::endl;
-    // }
 
     expPS_penalty = RESCALE_BF(PS_penalty, PS_penalty * 3, TT, kT);
     expPSM_penalty = RESCALE_BF(PSM_penalty, PSM_penalty * 3, TT, kT);
@@ -149,7 +146,6 @@ inline pf_t W_final_pf::to_PF(pf_t energy, cand_pos_t length) {
 }
 
 pf_t W_final_pf::hfold_pf(sparse_tree &tree) {
-
     for (cand_pos_t i = n; i >= 1; --i) {
         for (cand_pos_t j = i; j <= n; ++j) {
 
@@ -297,15 +293,13 @@ pf_t W_final_pf::HairpinE(cand_pos_t i, cand_pos_t j) {
 pf_t W_final_pf::compute_internal_restricted(cand_pos_t i, cand_pos_t j, std::vector<int> &up) {
     pf_t v_iloop = 0;
     cand_pos_t max_k = std::min(j - TURN - 2, i + MAXLOOP + 1);
-    const pair_type ptype_closing = pair[S_[i]][S_[j]];
     for (cand_pos_t k = i + 1; k <= max_k; ++k) {
         if ((up[k - 1] >= (k - i - 1))) {
             cand_pos_t min_l = std::max(k + TURN + 1 + MAXLOOP + 2, k + j - i) - MAXLOOP - 2;
             for (cand_pos_t l = j - 1; l >= min_l; --l) {
                 if (up[j - 1] >= (j - l - 1)) {
-                    pf_t v_iloop_kl = V.get(k, l)
-                                      * exp_E_IntLoop(k - i - 1, j - l - 1, ptype_closing, rtype[pair[S_[k]][S_[l]]], S1_[i + 1], S1_[j - 1],
-                                                      S1_[k - 1], S1_[l + 1], exp_params_);
+                    pf_t v_iloop_kl = V.get(k, l) * compute_int(i,j,k,l);
+
                     cand_pos_t u1 = k - i - 1;
                     cand_pos_t u2 = j - l - 1;
                     if(i+1==k && j-1==l) v_iloop_kl*=ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j); // Decide whether shape can be added to internal as well as stack
@@ -431,7 +425,7 @@ void W_final_pf::compute_WIP(cand_pos_t i, cand_pos_t j, sparse_tree &tree) {
     pf_t contributions = 0;
     contributions += V.get(i,j) * expbp_penalty;
     contributions += WMB.get(i, j) * expbp_penalty * expPSM_penalty;
-    for (cand_pos_t k = i + 1; k < j - TURN - 1; ++k) {
+    for (cand_pos_t k = i + 1; k <= j - TURN - 1; ++k) {
         bool can_pair = tree.up[k - 1] >= (k - i);
 
         contributions += (WIP.get(i, k - 1) * V.get(k,j) * expbp_penalty);
@@ -601,8 +595,7 @@ void W_final_pf::compute_WMBP(cand_pos_t i, cand_pos_t j, sparse_tree &tree) {
                 if (bp_il >= 0 && l > bp_il && Bp_lj > 0 && l < Bp_lj) {
                     cand_pos_t B_lj = tree.B(l, j);
                     if (i <= tree.tree[l].parent->index && tree.tree[l].parent->index < j && l + TURN <= j) {
-                        pf_t m1 = get_BE(tree.tree[B_lj].pair, B_lj, tree.tree[Bp_lj].pair, Bp_lj, tree) * WMBP.get(i, l - 1)
-                                  * VP.get(l, j) * pow(expPB_penalty, 2);
+                        pf_t m1 = get_BE(tree.tree[B_lj].pair, B_lj, tree.tree[Bp_lj].pair, Bp_lj, tree) * WMBP.get(i, l - 1) * VP.get(l, j) * pow(expPB_penalty, 2);
                         contributions += m1;
                     }
                 }
@@ -621,8 +614,7 @@ void W_final_pf::compute_WMBP(cand_pos_t i, cand_pos_t j, sparse_tree &tree) {
                 if (bp_il >= 0 && l > bp_il && Bp_lj > 0 && l < Bp_lj) {
                     cand_pos_t B_lj = tree.B(l, j);
                     if (i <= tree.tree[l].parent->index && tree.tree[l].parent->index < j && l + TURN <= j) {
-                        pf_t m2 = get_BE(tree.tree[B_lj].pair, B_lj, tree.tree[Bp_lj].pair, Bp_lj, tree) * WMBW.get(i, l - 1)
-                                  * VP.get(l, j) * pow(expPB_penalty, 2);
+                        pf_t m2 = get_BE(tree.tree[B_lj].pair, B_lj, tree.tree[Bp_lj].pair, Bp_lj, tree) * WMBW.get(i, l - 1) * VP.get(l, j) * pow(expPB_penalty, 2);
                         contributions += m2;
                     }
                 }
@@ -638,8 +630,7 @@ void W_final_pf::compute_WMBP(cand_pos_t i, cand_pos_t j, sparse_tree &tree) {
             cand_pos_t bp_il = tree.bp(i, l);
             if (bp_il >= 0 && bp_il < n && l + TURN <= j) {
                 if (i <= tree.tree[l].parent->index && tree.tree[l].parent->index < j && l + TURN <= j) {
-                    pf_t m4 = get_BE(i, tree.tree[i].pair, bp_il, tree.tree[bp_il].pair, tree) * WI.get(bp_il + 1, l - 1) * VP.get(l, j)
-                              * pow(expPB_penalty, 2);
+                    pf_t m4 = get_BE(i, tree.tree[i].pair, bp_il, tree.tree[bp_il].pair, tree) * WI.get(bp_il + 1, l - 1) * VP.get(l, j) * pow(expPB_penalty, 2);
                     contributions += m4;
                 }
             }
@@ -708,7 +699,7 @@ void W_final_pf::compute_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_
             bool weakly_closed_il = tree.weakly_closed(i + 1, l - 1);   // weakly closed between i+1 and l-1
             bool weakly_closed_lpj = tree.weakly_closed(lp + 1, j - 1); // weakly closed between lp+1 and j-1
 
-            if (empty_region_il && empty_region_lpj) { //&& !(ip == (i+1) && jp==(j-1)) && !(l == (i+1) && lp == (j-1))){
+            if (empty_region_il && empty_region_lpj && i+1!=l && j-1!=lp) {
                 pf_t eintp = get_e_intP(i, l, lp, j) * get_BE(l, lp, ip, jp, tree);
                 cand_pos_t u1 = l - i - 1;
                 cand_pos_t u2 = j - lp - 1;
@@ -845,7 +836,6 @@ void W_final_pf::Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure,
     qbt1 += V_temp;
     if (qbt1 >= r) return;
     cand_pos_t max_k = std::min(j - TURN - 2, i + MAXLOOP + 1); // i+1+tree.up[i+1]?
-    const pair_type ptype_closing = pair[S_[i]][S_[j]];
     for (k = i + 1; k <= max_k; k++) {
         if (tree.up[k - 1] >= (k - i - 1)) {
             cand_pos_t min_l = std::max(k + TURN + 1 + MAXLOOP + 2, k + j - i) - MAXLOOP - 2;
@@ -853,9 +843,8 @@ void W_final_pf::Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure,
                 if (tree.up[j - 1] >= (j - l - 1)) {
                     cand_pos_t u1 = k - i - 1;
                     cand_pos_t u2 = j - l - 1;
-                    V_temp = V.get(k,l)
-                             * exp_E_IntLoop(u1, u2, ptype_closing, rtype[pair[S_[k]][S_[l]]], S1_[i + 1], S1_[j - 1], S1_[k - 1], S1_[l + 1],
-                                             exp_params_);
+                    V_temp = V.get(k,l) * compute_int(i,j,k,l);
+
                     if(i+1==k && j-1==l) V_temp*=ShapeData->get_expcalculated(i)*ShapeData->get_expcalculated(j);
                     V_temp *= scale[u1 + u2 + 2];
                     qbt1 += V_temp;

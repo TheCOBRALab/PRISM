@@ -39,7 +39,7 @@ SHAPEData::SHAPEData(const std::string &filename, cand_pos_t n, double slope, do
         ++i;
         if(!tok.empty() && tok.find_first_not_of(".0123456789") != std::string::npos) continue;
         double reactivity = std::stod(tok);
-        calculated[i] = 100.0*calculate(reactivity);
+        calculated[i] = lrint(100.0*calculate(reactivity));
         expcalculated[i] = calculated[i];
     }
     in.close();
