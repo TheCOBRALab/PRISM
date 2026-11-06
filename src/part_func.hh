@@ -189,50 +189,35 @@ class W_final_pf {
 
     void pairing_tendency(std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
 
-    void Sample_W(cand_pos_t start, cand_pos_t end, std::string &structure,
-                  std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_W(cand_pos_t start, cand_pos_t end, std::string &structure, sparse_tree &tree);
 
-    void Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure,
-                  std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_VM(cand_pos_t i, cand_pos_t j, std::string &structure,
-                   std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_VM(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_WM(cand_pos_t i, cand_pos_t j, std::string &structure,
-                   std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_WM(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_WMV(cand_pos_t i, cand_pos_t j, std::string &structure,
-                    std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_WMV(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_WMP(cand_pos_t i, cand_pos_t j, std::string &structure,
-                    std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_WMP(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_WMB(cand_pos_t i, cand_pos_t j, std::string &structure,
-                    std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_WMB(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_WMBW(cand_pos_t i, cand_pos_t j, std::string &structure,
-                     std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_WMBW(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_WMBP(cand_pos_t i, cand_pos_t j, std::string &structure,
-                     std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_WMBP(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_WI(cand_pos_t i, cand_pos_t j, std::string &structure,
-                   std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_WI(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_WIP(cand_pos_t i, cand_pos_t j, std::string &structure,
-                    std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_WIP(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
-                   std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_VPL(cand_pos_t i, cand_pos_t j, std::string &structure,
-                    std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_VPL(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_VPR(cand_pos_t i, cand_pos_t j, std::string &structure,
-                    std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_VPR(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree);
 
-    void Sample_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t jp, std::string &structure,
-                   std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree);
+    void Sample_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t jp, std::string &structure, sparse_tree &tree);
 
     /**                                                     MEA                                                             */
     pf_t compute_MEA(sparse_tree &tree, double gamma);

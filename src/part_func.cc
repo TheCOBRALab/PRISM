@@ -184,7 +184,7 @@ pf_t W_final_pf::hfold_pf(sparse_tree &tree) {
     structure = std::string(n, '.');
     for (cand_pos_t i = 0; i < num_samples; ++i) {
         std::string structure(n, '.');
-        Sample_W(1, n, structure, samples, tree);
+        Sample_W(1, n, structure, tree);
         structures[structure]++;
     }
 
@@ -749,8 +749,7 @@ std::vector<cand_pos_t> boustrophedon(cand_pos_t start, cand_pos_t end) {
     return seq;
 }
 
-void W_final_pf::Sample_W(cand_pos_t start, cand_pos_t end, std::string &structure,
-                          std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_W(cand_pos_t start, cand_pos_t end, std::string &structure, sparse_tree &tree) {
     if (debug) printf("W at %d and %d with W[j]=%f,%f\n", start, end, W[end], to_Energy(W[end], end));
     cand_pos_t j = end;
     cand_pos_t m = end;
@@ -801,17 +800,16 @@ void W_final_pf::Sample_W(cand_pos_t start, cand_pos_t end, std::string &structu
             printf("backtracking failed in ext loop at %d and %d with W[j] = %f, qt:%f < r:%f\n", start, end, W[j], qt, r);
             exit(0); /* error */
         }
-        Sample_W(start, k - 1, structure, samples, tree);
+        Sample_W(start, k - 1, structure, tree);
         if (!pseudoknot) {
-            Sample_V(k, j, structure, samples, tree);
+            Sample_V(k, j, structure, tree);
         } else {
-            Sample_WMB(k, j, structure, samples, tree);
+            Sample_WMB(k, j, structure, tree);
         }
     }
 }
 
-void W_final_pf::Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure,
-                          std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("V at %d and %d with V[i,j]=%f,%f\n", i, j,V.get(i,j), to_Energy(V.get(i,j), j-i+1));
 
     cand_pos_t k = i;
@@ -855,7 +853,7 @@ void W_final_pf::Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure,
         }
     }
     if (qbt1 >= r) {
-        Sample_V(k, l, structure, samples, tree); // Backtrack the internal loop
+        Sample_V(k, l, structure, tree); // Backtrack the internal loop
         return;
     }
 
@@ -867,11 +865,10 @@ void W_final_pf::Sample_V(cand_pos_t i, cand_pos_t j, std::string &structure,
     }
 
     // Must be a multiloop
-    Sample_VM(i, j, structure, samples, tree);
+    Sample_VM(i, j, structure, tree);
 }
 
-void W_final_pf::Sample_VM(cand_pos_t i, cand_pos_t j, std::string &structure,
-                           std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_VM(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("VM at %d and %d with VM[i,j] = %f,%f\n", i, j, VM.get(i,j), to_Energy(VM.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t qt = 0;
@@ -914,16 +911,15 @@ void W_final_pf::Sample_VM(cand_pos_t i, cand_pos_t j, std::string &structure,
     }
 
     if (!unpaired) {
-        Sample_WM(i + 1, k - 1, structure, samples, tree);
+        Sample_WM(i + 1, k - 1, structure, tree);
     }
     if (!pseudoknot) { // Case 1
-        Sample_WMV(k, j - 1, structure, samples, tree);
+        Sample_WMV(k, j - 1, structure, tree);
     } else { // Case 2 or 3
-        Sample_WMP(k, j - 1, structure, samples, tree);
+        Sample_WMP(k, j - 1, structure, tree);
     }
 }
-void W_final_pf::Sample_WM(cand_pos_t i, cand_pos_t j, std::string &structure,
-                           std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_WM(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("WM at %d and %d with WM[i,j] = %f,%f\n", i, j, WM.get(i,j), to_Energy(WM.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t qt = 0;
@@ -995,16 +991,15 @@ void W_final_pf::Sample_WM(cand_pos_t i, cand_pos_t j, std::string &structure,
         exit(0);
     }
     if (!unpaired) {
-        Sample_WM(i, k - 1, structure, samples, tree);
+        Sample_WM(i, k - 1, structure, tree);
     }
     if (!pseudoknot) {
-        Sample_V(k, j, structure, samples, tree);
+        Sample_V(k, j, structure, tree);
     } else {
-        Sample_WMB(k, j, structure, samples, tree);
+        Sample_WMB(k, j, structure, tree);
     }
 }
-void W_final_pf::Sample_WMV(cand_pos_t i, cand_pos_t j, std::string &structure,
-                            std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_WMV(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("WMv at %d and %d with WMv[i,j] = %f,%f\n", i, j, WMv.get(i,j), to_Energy(WMv.get(i,j), j-i+1));
 
     pf_t V_temp = 0.;
@@ -1027,11 +1022,10 @@ void W_final_pf::Sample_WMV(cand_pos_t i, cand_pos_t j, std::string &structure,
         exit(0); /* error */
     }
 
-    Sample_V(i, j, structure, samples, tree);
+    Sample_V(i, j, structure, tree);
 }
 
-void W_final_pf::Sample_WMP(cand_pos_t i, cand_pos_t j, std::string &structure,
-                            std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_WMP(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("WMp at %d and %d with WMp[i,j] = %f,%f\n", i, j, WMp.get(i,j), to_Energy(WMp.get(i,j), j-i+1));
 
     pf_t V_temp = 0.;
@@ -1054,11 +1048,10 @@ void W_final_pf::Sample_WMP(cand_pos_t i, cand_pos_t j, std::string &structure,
         exit(0); /* error */
     }
 
-    Sample_WMB(i, j, structure, samples, tree);
+    Sample_WMB(i, j, structure, tree);
 }
 
-void W_final_pf::Sample_WMB(cand_pos_t i, cand_pos_t j, std::string &structure,
-                            std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_WMB(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("WMB at %d and %d with WMB[i,j] = %f,%f\n", i, j, WMB.get(i,j), to_Energy(WMB.get(i,j), j-i+1));
     cand_pos_t l = j;
     pf_t qt = 0;
@@ -1084,9 +1077,9 @@ void W_final_pf::Sample_WMB(cand_pos_t i, cand_pos_t j, std::string &structure,
         }
     }
     if (qt >= r) { // I could put this in the for loop then just do sample_WMBP if it doesn't sample in there
-        Sample_BE(bp_j, j, tree.tree[Bp_lj].pair, Bp_lj, structure, samples, tree);
-        Sample_WMBP(i, l, structure, samples, tree);
-        Sample_WI(l + 1, Bp_lj - 1, structure, samples, tree);
+        Sample_BE(bp_j, j, tree.tree[Bp_lj].pair, Bp_lj, structure, tree);
+        Sample_WMBP(i, l, structure, tree);
+        Sample_WI(l + 1, Bp_lj - 1, structure, tree);
 		return;
     }
     V_temp = WMBP.get(i, j);
@@ -1095,11 +1088,10 @@ void W_final_pf::Sample_WMB(cand_pos_t i, cand_pos_t j, std::string &structure,
         printf("backtracking failed for WMB\n");
         exit(0); /* error */
     }
-    Sample_WMBP(i, j, structure, samples, tree);
+    Sample_WMBP(i, j, structure, tree);
 }
 
-void W_final_pf::Sample_WI(cand_pos_t i, cand_pos_t j, std::string &structure,
-                           std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_WI(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("WI at %d and %d with WI[i,j] = %f,%f\n", i, j, WI.get(i,j), to_Energy(WI.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t qt = 0, qbt1 = 0, qbt2 = 0;
@@ -1142,17 +1134,16 @@ void W_final_pf::Sample_WI(cand_pos_t i, cand_pos_t j, std::string &structure,
             }
         }
 
-        Sample_WI(i, k - 1, structure, samples, tree);
+        Sample_WI(i, k - 1, structure, tree);
         if (!pseudoknot) {
-            Sample_V(k, j, structure, samples, tree);
+            Sample_V(k, j, structure, tree);
         } else {
-            Sample_WMB(k, j, structure, samples, tree);
+            Sample_WMB(k, j, structure, tree);
         }
     }
 }
 
-void W_final_pf::Sample_WIP(cand_pos_t i, cand_pos_t j, std::string &structure,
-                            std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_WIP(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("WIP at %d and %d with WIP[i,j] = %f,%f\n", i, j,WIP.get(i,j), to_Energy(WIP.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t fbd = 0;
@@ -1225,17 +1216,16 @@ void W_final_pf::Sample_WIP(cand_pos_t i, cand_pos_t j, std::string &structure,
         exit(0);
     }
     if (!unpaired) {
-        Sample_WIP(i, k - 1, structure, samples, tree);
+        Sample_WIP(i, k - 1, structure, tree);
     }
     if (!pseudoknot) {
-        Sample_V(k, j, structure, samples, tree);
+        Sample_V(k, j, structure, tree);
     } else {
-        Sample_WMB(k, j, structure, samples, tree);
+        Sample_WMB(k, j, structure, tree);
     }
 }
 
-void W_final_pf::Sample_WMBW(cand_pos_t i, cand_pos_t j, std::string &structure,
-                             std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_WMBW(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("WMBW at %d and %d, with WMBW[i,j] = %f,%f\n", i, j,WMBW.get(i,j), to_Energy(WMBW.get(i,j), j-i+1));
     cand_pos_t l = j;
     pf_t fbd = 0;
@@ -1259,13 +1249,12 @@ void W_final_pf::Sample_WMBW(cand_pos_t i, cand_pos_t j, std::string &structure,
         printf("Backtracking failed in WMBW for pair (%d,%d) with qt=%f < r=%f and l = %d\n", i, j, qt, r, l);
         exit(0);
     }
-    Sample_WMBP(i, l, structure, samples, tree);
-    Sample_WI(l + 1, j, structure, samples, tree);
+    Sample_WMBP(i, l, structure, tree);
+    Sample_WI(l + 1, j, structure, tree);
 	return;
 }
 
-void W_final_pf::Sample_WMBP(cand_pos_t i, cand_pos_t j, std::string &structure,
-                             std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_WMBP(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("WMBP at %d and %d with WMBP[i,j] = %f,%f\n", i, j, WMBP.get(i,j), to_Energy(WMBP.get(i,j), j-i+1));
     cand_pos_t l = j;
     pf_t qt = 0;
@@ -1301,9 +1290,9 @@ void W_final_pf::Sample_WMBP(cand_pos_t i, cand_pos_t j, std::string &structure,
         }
     }
     if (case1) {
-        Sample_BE(tree.tree[B_lj].pair, B_lj, tree.tree[Bp_lj].pair, Bp_lj, structure, samples, tree);
-        Sample_WMBP(i, l - 1, structure, samples, tree);
-        Sample_VP(l, j, structure, samples, tree);
+        Sample_BE(tree.tree[B_lj].pair, B_lj, tree.tree[Bp_lj].pair, Bp_lj, structure, tree);
+        Sample_WMBP(i, l - 1, structure, tree);
+        Sample_VP(l, j, structure, tree);
         return;
     }
 
@@ -1330,16 +1319,16 @@ void W_final_pf::Sample_WMBP(cand_pos_t i, cand_pos_t j, std::string &structure,
         }
     }
     if (case2) {
-        Sample_BE(tree.tree[B_lj].pair, B_lj, tree.tree[Bp_lj].pair, Bp_lj, structure, samples, tree);
-        Sample_WMBW(i, l - 1, structure, samples, tree);
-        Sample_VP(l, j, structure, samples, tree);
+        Sample_BE(tree.tree[B_lj].pair, B_lj, tree.tree[Bp_lj].pair, Bp_lj, structure, tree);
+        Sample_WMBW(i, l - 1, structure, tree);
+        Sample_VP(l, j, structure, tree);
         return;
     }
 
     V_temp = VP.get(i, j) * expPB_penalty;
     qt += V_temp;
     if (qt >= r) {
-        Sample_VP(i, j, structure, samples, tree);
+        Sample_VP(i, j, structure, tree);
         return;
     }
 
@@ -1360,9 +1349,9 @@ void W_final_pf::Sample_WMBP(cand_pos_t i, cand_pos_t j, std::string &structure,
         }
     }
     if (case4) {
-        Sample_BE(i, tree.tree[i].pair, bp_il, tree.tree[bp_il].pair, structure, samples, tree);
-        Sample_WI(bp_il + 1, l - 1, structure, samples, tree);
-        Sample_VP(l, j, structure, samples, tree);
+        Sample_BE(i, tree.tree[i].pair, bp_il, tree.tree[bp_il].pair, structure, tree);
+        Sample_WI(bp_il + 1, l - 1, structure, tree);
+        Sample_VP(l, j, structure, tree);
 		return;
     } else {
         printf("backtracking failed for WMBP\n");
@@ -1370,8 +1359,7 @@ void W_final_pf::Sample_WMBP(cand_pos_t i, cand_pos_t j, std::string &structure,
     }
 }
 
-void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
-                           std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("VP at %d and %d with VP[i,j] = %f,%f\n", i, j,VP.get(i,j), to_Energy(VP.get(i,j), j-i+1));
     cand_pos_t k, l;
     pf_t qt = 0;
@@ -1396,8 +1384,8 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
         V_temp *= scale[2];
         qt += V_temp;
         if (qt >= r) {
-            Sample_WI(i + 1, Bp_ij - 1, structure, samples, tree);
-            Sample_WI(B_ij + 1, j - 1, structure, samples, tree);
+            Sample_WI(i + 1, Bp_ij - 1, structure, tree);
+            Sample_WI(B_ij + 1, j - 1, structure, tree);
             return;
         }
     }
@@ -1406,8 +1394,8 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
         V_temp *= scale[2];
         qt += V_temp;
         if (qt >= r) {
-            Sample_WI(i + 1, b_ij - 1, structure, samples, tree);
-            Sample_WI(bp_ij + 1, j - 1, structure, samples, tree);
+            Sample_WI(i + 1, b_ij - 1, structure, tree);
+            Sample_WI(bp_ij + 1, j - 1, structure, tree);
             return;
         }
     }
@@ -1416,9 +1404,9 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
         V_temp *= scale[2];
         qt += V_temp;
         if (qt >= r) {
-            Sample_WI(i + 1, Bp_ij - 1, structure, samples, tree);
-            Sample_WI(B_ij + 1, b_ij - 1, structure, samples, tree);
-            Sample_WI(bp_ij + 1, j - 1, structure, samples, tree);
+            Sample_WI(i + 1, Bp_ij - 1, structure, tree);
+            Sample_WI(B_ij + 1, b_ij - 1, structure, tree);
+            Sample_WI(bp_ij + 1, j - 1, structure, tree);
             return;
         }
     }
@@ -1429,7 +1417,7 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
         V_temp *= scale[2];
         qt += V_temp;
         if (qt >= r) {
-            Sample_VP(i + 1, j - 1, structure, samples, tree);
+            Sample_VP(i + 1, j - 1, structure, tree);
             return;
         }
     }
@@ -1462,7 +1450,7 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
         }
     }
     if (k < min_borders) {
-        Sample_VP(k, l, structure, samples, tree);
+        Sample_VP(k, l, structure, tree);
         return;
     }
 
@@ -1477,8 +1465,8 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
         }
     }
     if (k < min_Bp_j) {
-        Sample_WIP(i + 1, k - 1, structure, samples, tree);
-        Sample_VP(k, j - 1, structure, samples, tree);
+        Sample_WIP(i + 1, k - 1, structure, tree);
+        Sample_VP(k, j - 1, structure, tree);
 		return;
     }
 
@@ -1491,8 +1479,8 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
         }
     }
     if (k < j) {
-        Sample_VP(i + 1, k, structure, samples, tree);
-        Sample_WIP(k + 1, j - 1, structure, samples, tree);
+        Sample_VP(i + 1, k, structure, tree);
+        Sample_WIP(k + 1, j - 1, structure, tree);
         return;
     }
 
@@ -1505,8 +1493,8 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
         }
     }
     if (k < min_Bp_j) {
-        Sample_WIP(i + 1, k - 1, structure, samples, tree);
-        Sample_VPR(k, j - 1, structure, samples, tree);
+        Sample_WIP(i + 1, k - 1, structure, tree);
+        Sample_VPR(k, j - 1, structure, tree);
         return;
     }
 
@@ -1519,14 +1507,13 @@ void W_final_pf::Sample_VP(cand_pos_t i, cand_pos_t j, std::string &structure,
         }
     }
     if (k < j) {
-        Sample_VPL(i + 1, k, structure, samples, tree);
-        Sample_WIP(k + 1, j - 1, structure, samples, tree);
+        Sample_VPL(i + 1, k, structure, tree);
+        Sample_WIP(k + 1, j - 1, structure, tree);
         return;
     }
 }
 
-void W_final_pf::Sample_VPL(cand_pos_t i, cand_pos_t j, std::string &structure,
-                            std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_VPL(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("VPL at %d and %d with VPL[i,j] = %f,%f\n", i, j, VPL.get(i,j), to_Energy(VPL.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t fbd = 0;
@@ -1546,15 +1533,14 @@ void W_final_pf::Sample_VPL(cand_pos_t i, cand_pos_t j, std::string &structure,
         }
     }
     if (k < min_Bp_j) {
-        Sample_VP(k, j, structure, samples, tree);
+        Sample_VP(k, j, structure, tree);
     } else {
         printf("Backtracking error in VPL\n");
         exit(0);
     }
 }
 
-void W_final_pf::Sample_VPR(cand_pos_t i, cand_pos_t j, std::string &structure,
-                            std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_VPR(cand_pos_t i, cand_pos_t j, std::string &structure, sparse_tree &tree) {
     if (debug) printf("VPR at %d and %d with VPR[i,j] = %f,%f\n", i, j,VPR.get(i,j), to_Energy(VPR.get(i,j), j-i+1));
     cand_pos_t k;
     pf_t fbd = 0;
@@ -1587,13 +1573,12 @@ void W_final_pf::Sample_VPR(cand_pos_t i, cand_pos_t j, std::string &structure,
     }
 
     if (!unpaired) {
-        Sample_WIP(k + 1, j, structure, samples, tree);
+        Sample_WIP(k + 1, j, structure, tree);
     }
-    Sample_VP(i, k, structure, samples, tree);
+    Sample_VP(i, k, structure, tree);
 }
 
-void W_final_pf::Sample_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t jp, std::string &structure,
-                           std::unordered_map<std::pair<cand_pos_t, cand_pos_t>, cand_pos_t, SzudzikHash> &samples, sparse_tree &tree) {
+void W_final_pf::Sample_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t jp, std::string &structure, sparse_tree &tree) {
     
 	if (debug) printf("BE at %d and %d, and %d and %d\n", i, j, ip, jp);
 
@@ -1628,7 +1613,7 @@ void W_final_pf::Sample_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t
     }
 
     if (tree.tree[i + 1].pair == j - 1) {
-        Sample_BE(i + 1, j - 1, ip, jp, structure, samples, tree);
+        Sample_BE(i + 1, j - 1, ip, jp, structure, tree);
         return;
     }
     pf_t expbp2 = pow(expbp_penalty, 2);
@@ -1686,12 +1671,12 @@ void W_final_pf::Sample_BE(cand_pos_t i, cand_pos_t j, cand_pos_t ip, cand_pos_t
     }
 
     if (!unpaired_left) {
-        Sample_WIP(i + 1, l - 1, structure, samples, tree);
+        Sample_WIP(i + 1, l - 1, structure, tree);
     }
     if (!unpaired_right) {
-        Sample_WIP(lp + 1, j - 1, structure, samples, tree);
+        Sample_WIP(lp + 1, j - 1, structure, tree);
     }
-    Sample_BE(l, lp, ip, jp, structure, samples, tree);
+    Sample_BE(l, lp, ip, jp, structure, tree);
 }
 
 char W_final_pf::bpp_symbol(pf_t *P) {
