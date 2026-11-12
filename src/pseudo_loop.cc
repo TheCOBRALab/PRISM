@@ -262,7 +262,7 @@ void pseudo_loop::compute_WI(cand_pos_t i, cand_pos_t j) {
         WI.set(i,j) = PUP_penalty;
         return;
     }
-    for (cand_pos_t k = i; k <= j - TURN - 1; ++k) {
+    for (cand_pos_t k = i+1; k <= j - TURN - 1; ++k) {
         energy_t wi_1 = WI.get(i, k - 1);
         energy_t v_energy = wi_1 + get_energy(k, j);
         energy_t wmb_energy = wi_1 + WMB.get(k,j);
